@@ -56,8 +56,15 @@ public class FoodEffectHandler {
                 for (FoodConfig.EffectBonus bonus : bonuses) {
                     // 判断概率
                     if (RANDOM.nextFloat() < bonus.chance) {
-                        // 给予效果 (duration * 20 把秒转为tick)
-                        player.addEffect(new MobEffectInstance(bonus.effect, bonus.durationSeconds * 20, bonus.amplifier));
+                        // 饱和效果特殊处理：duration 直接是 tick 值
+                        // 其他效果：duration * 20 把秒转为tick
+                        int tickDuration;
+                        if (bonus.effect == MobEffects.SATURATION) {
+                            tickDuration = bonus.durationSeconds; // 直接使用tick值
+                        } else {
+                            tickDuration = bonus.durationSeconds * 20; // 秒转tick
+                        }
+                        player.addEffect(new MobEffectInstance(bonus.effect, tickDuration, bonus.amplifier));
                     }
                 }
             }

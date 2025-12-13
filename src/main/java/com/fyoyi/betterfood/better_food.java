@@ -197,12 +197,34 @@ public class better_food
         private static void addFreshFoodEffects(net.minecraftforge.event.entity.player.ItemTooltipEvent event, ItemStack stack) {
             java.util.List<FoodConfig.EffectBonus> bonuses = FoodConfig.getBonusEffects(stack);
             if (bonuses != null && !bonuses.isEmpty()) {
-                event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.LIGHT_PURPLE));
+                // 过滤掉概率为 0 的效果
+                java.util.List<FoodConfig.EffectBonus> validBonuses = new java.util.ArrayList<>();
                 for (FoodConfig.EffectBonus bonus : bonuses) {
-                    int chancePercent = (int)(bonus.chance * 100);
-                    String effectName = getEffectName(bonus.effect);
-                    String amplifierStr = bonus.amplifier > 0 ? (" " + toRoman(bonus.amplifier + 1)) : "";
-                    event.getToolTip().add(Component.literal(" - " + chancePercent + "%概率获得" + effectName + amplifierStr + " (" + bonus.durationSeconds + "秒)").withStyle(ChatFormatting.LIGHT_PURPLE));
+                    if (bonus.chance > 0.0f) {
+                        validBonuses.add(bonus);
+                    }
+                }
+                
+                if (!validBonuses.isEmpty()) {
+                    event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.LIGHT_PURPLE));
+                    for (FoodConfig.EffectBonus bonus : validBonuses) {
+                        int chancePercent = (int)(bonus.chance * 100);
+                        String effectName = getEffectName(bonus.effect);
+                        String amplifierStr = bonus.amplifier > 0 ? (" " + toRoman(bonus.amplifier + 1)) : "";
+                        
+                        // 饱和效果特殊显示：显示饥饿度恢复量（2tick = 1饥饿度）
+                        String durationStr;
+                        if (bonus.effect == net.minecraft.world.effect.MobEffects.SATURATION) {
+                            int hunger = bonus.durationSeconds / 2; // 2tick = 1饥饿度
+                            durationStr = "+" + hunger + "饥饿度"; // 显示恢复的饥饿度
+                        } else {
+                            durationStr = bonus.durationSeconds + "秒";
+                        }
+                        
+                        event.getToolTip().add(Component.literal(" - " + chancePercent + "%概率获得" + effectName + amplifierStr + " (" + durationStr + ")").withStyle(ChatFormatting.LIGHT_PURPLE));
+                    }
+                } else {
+                    event.getToolTip().add(Component.literal("食用效果: 无额外效果").withStyle(ChatFormatting.GRAY));
                 }
             } else {
                 event.getToolTip().add(Component.literal("食用效果: 无额外效果").withStyle(ChatFormatting.GRAY));
@@ -210,21 +232,14 @@ public class better_food
         }
 
         /**
-         * 获取效果名称 (中文)
+         * 获取效果名称 (中文) - 只支持6种食物奖励效果
          */
         private static String getEffectName(net.minecraft.world.effect.MobEffect effect) {
             if (effect == net.minecraft.world.effect.MobEffects.SATURATION) return "饱和";
             if (effect == net.minecraft.world.effect.MobEffects.REGENERATION) return "生命恢复";
             if (effect == net.minecraft.world.effect.MobEffects.ABSORPTION) return "伤害吸收";
-            if (effect == net.minecraft.world.effect.MobEffects.HEALTH_BOOST) return "生命提升";
-            if (effect == net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED) return "速度";
-            if (effect == net.minecraft.world.effect.MobEffects.DIG_SPEED) return "急迫";
-            if (effect == net.minecraft.world.effect.MobEffects.DAMAGE_BOOST) return "力量";
-            if (effect == net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE) return "抗性提升";
             if (effect == net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE) return "防火";
             if (effect == net.minecraft.world.effect.MobEffects.WATER_BREATHING) return "水下呼吸";
-            if (effect == net.minecraft.world.effect.MobEffects.NIGHT_VISION) return "夜视";
-            if (effect == net.minecraft.world.effect.MobEffects.JUMP) return "跳跃提升";
             if (effect == net.minecraft.world.effect.MobEffects.LUCK) return "幸运";
             return effect.getDescriptionId();
         }

@@ -1,84 +1,213 @@
 {
+  "_comment": "短期保鲜食物 (1天 16小时 40分)",
+  "_comment2": "支持的效果: saturation(饱和), regeneration(生命恢复), absorption(伤害吸收), fire_resistance(防火), water_breathing(水下呼吸), luck(幸运)",
+  "_comment3": "参数说明 - effect:效果类型, chance:概率(0.0-1.0), duration:持续时间(秒,饱和用tick), amplifier:等级(0=I, 1=II, 2=III)",
+
   "ticks": 120000,
   "items": [
     {
+      "_comment": "熟牛肉",
       "item": "minecraft:cooked_beef",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.8,
-          "duration": 5,
-          "amplifier": 0
-        },
-        {
-          "effect": "regeneration",
-          "chance": 0.3,
-          "duration": 3,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
     {
+      "_comment": "熟猪肉",
       "item": "minecraft:cooked_porkchop",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.8,
-          "duration": 5,
-          "amplifier": 0
-        },
-        {
-          "effect": "regeneration",
-          "chance": 0.3,
-          "duration": 3,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
     {
+      "_comment": "熟鸡肉",
       "item": "minecraft:cooked_chicken",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.7,
-          "duration": 4,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
     {
+      "_comment": "熟羊肉",
       "item": "minecraft:cooked_mutton",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.8,
-          "duration": 5,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
-    "minecraft:cooked_rabbit",
-    "minecraft:cooked_cod",
-    "minecraft:cooked_salmon",
     {
+      "_comment": "熟兔肉",
+      "item": "minecraft:cooked_rabbit",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "熟鳕鱼",
+      "item": "minecraft:cooked_cod",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "熟鲑鱼",
+      "item": "minecraft:cooked_salmon",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "苹果",
       "item": "minecraft:apple",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.6,
-          "duration": 3,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
-    "minecraft:melon_slice",
-    "minecraft:sweet_berries",
-    "minecraft:glow_berries",
-    "minecraft:chorus_fruit",
-    "minecraft:mushroom_stew",
-    "minecraft:beetroot_soup",
-    "minecraft:rabbit_stew",
-    "minecraft:pumpkin_pie",
-    "minecraft:cake"
+    {
+      "_comment": "西瓜片",
+      "item": "minecraft:melon_slice",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "甜浆果",
+      "item": "minecraft:sweet_berries",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "发光浆果",
+      "item": "minecraft:glow_berries",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "紫颂果",
+      "item": "minecraft:chorus_fruit",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "蘑菇煎",
+      "item": "minecraft:mushroom_stew",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "甜菜汤",
+      "item": "minecraft:beetroot_soup",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "兔肉煲",
+      "item": "minecraft:rabbit_stew",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "南瓜派",
+      "item": "minecraft:pumpkin_pie",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "蛋糕",
+      "item": "minecraft:cake",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    }
   ]
 }

@@ -1,32 +1,55 @@
 {
+  "_comment": "永久保鲜食物 (不会腐烂)",
+  "_comment2": "支持的效果: saturation(饱和), regeneration(生命恢复), absorption(伤害吸收), fire_resistance(防火), water_breathing(水下呼吸), luck(幸运)",
+  "_comment3": "参数说明 - effect:效果类型, chance:概率(0.0-1.0), duration:持续时间(秒,饱和用tick), amplifier:等级(0=I, 1=II, 2=III)",
+
   "ticks": -1,
   "items": [
     {
+      "_comment": "附魔金苹果",
       "item": "minecraft:enchanted_golden_apple",
       "effects": [
         {
+          "_comment": "饱和 概率 tick 强度",
           "effect": "saturation",
           "chance": 1.0,
-          "duration": 20,
+          "duration": 4,
           "amplifier": 2
         },
         {
+          "_comment": "生命恢复 概率 时间 强度",
           "effect": "regeneration",
-          "chance": 1.0,
-          "duration": 10,
-          "amplifier": 2
+          "chance": 0,
+          "duration": 0,
+          "amplifier": 0
         },
         {
+          "_comment": "伤害吸收 概率 时间 强度",
           "effect": "absorption",
+          "chance": 0,
+          "duration": 0,
+          "amplifier": 0
+        },
+        {
+          "_comment": "防火 概率 时间 强度",
+          "effect": "fire_resistance",
+          "chance": 0,
+          "duration": 0,
+          "amplifier": 0
+        },
+        {
+          "_comment": "水下呼吸 概率 时间 强度",
+          "effect": "water_breathing",
           "chance": 1.0,
-          "duration": 60,
+          "duration": 180,
           "amplifier": 1
         },
         {
-          "effect": "resistance",
-          "chance": 0.8,
-          "duration": 30,
-          "amplifier": 0
+          "_comment": "幸运 概率 时间 强度",
+          "effect": "luck",
+          "chance": 1.0,
+          "duration": 500,
+          "amplifier": 3
         }
       ]
     }

@@ -122,24 +122,20 @@ public class FoodExpiryManager extends SimpleJsonResourceReloadListener {
     }
 
     /**
-     * 将字符串转换为 MobEffect
+     * 将字符串转换为 MobEffect（只支持6种食物奖励效果）
      */
     private MobEffect parseEffect(String effectType) {
         return switch (effectType.toLowerCase()) {
             case "saturation", "饱和" -> MobEffects.SATURATION;
             case "regeneration", "生命恢复" -> MobEffects.REGENERATION;
             case "absorption", "伤害吸收" -> MobEffects.ABSORPTION;
-            case "health_boost", "生命提升" -> MobEffects.HEALTH_BOOST;
-            case "speed", "速度" -> MobEffects.MOVEMENT_SPEED;
-            case "haste", "急迫" -> MobEffects.DIG_SPEED;
-            case "strength", "力量" -> MobEffects.DAMAGE_BOOST;
-            case "resistance", "抗性提升" -> MobEffects.DAMAGE_RESISTANCE;
             case "fire_resistance", "防火" -> MobEffects.FIRE_RESISTANCE;
             case "water_breathing", "水下呼吸" -> MobEffects.WATER_BREATHING;
-            case "night_vision", "夜视" -> MobEffects.NIGHT_VISION;
-            case "jump_boost", "跳跃提升" -> MobEffects.JUMP;
             case "luck", "幸运" -> MobEffects.LUCK;
-            default -> null;
+            default -> {
+                System.err.println("[BetterFood] 不支持的效果类型: " + effectType + "，只支持: saturation, regeneration, absorption, fire_resistance, water_breathing, luck");
+                yield null;
+            }
         };
     }
 }

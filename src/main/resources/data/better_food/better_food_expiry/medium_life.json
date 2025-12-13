@@ -1,42 +1,93 @@
 {
+  "_comment": "中期保鲜食物 (4天)",
+  "_comment2": "支持的效果: saturation(饱和), regeneration(生命恢复), absorption(伤害吸收), fire_resistance(防火), water_breathing(水下呼吸), luck(幸运)",
+  "_comment3": "参数说明 - effect:效果类型, chance:概率(0.0-1.0), duration:持续时间(秒,饱和用tick), amplifier:等级(0=I, 1=II, 2=III)",
+
   "ticks": 288000,
   "items": [
     {
+      "_comment": "面包",
       "item": "minecraft:bread",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.6,
-          "duration": 3,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
-    "minecraft:cookie",
     {
+      "_comment": "曲奇",
+      "item": "minecraft:cookie",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "胡萝卜",
       "item": "minecraft:carrot",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.5,
-          "duration": 2,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
-    "minecraft:potato",
     {
+      "_comment": "土豆",
+      "item": "minecraft:potato",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "烤土豆",
       "item": "minecraft:baked_potato",
       "effects": [
-        {
-          "effect": "saturation",
-          "chance": 0.6,
-          "duration": 3,
-          "amplifier": 0
-        }
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.6, "duration": 6, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
       ]
     },
-    "minecraft:beetroot",
-    "minecraft:dried_kelp"
+    {
+      "_comment": "甜菜根",
+      "item": "minecraft:beetroot",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    },
+    {
+      "_comment": "干海带",
+      "item": "minecraft:dried_kelp",
+      "effects": [
+        {"_comment": "饱和 概率 tick 强度", "effect": "saturation", "chance": 0.1, "duration": 2, "amplifier": 0},
+        {"_comment": "生命恢复 概率 时间 强度", "effect": "regeneration", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "伤害吸收 概率 时间 强度", "effect": "absorption", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "防火 概率 时间 强度", "effect": "fire_resistance", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "水下呼吸 概率 时间 强度", "effect": "water_breathing", "chance": 0.0, "duration": 0, "amplifier": 0},
+        {"_comment": "幸运 概率 时间 强度", "effect": "luck", "chance": 0.0, "duration": 0, "amplifier": 0}
+      ]
+    }
   ]
 }

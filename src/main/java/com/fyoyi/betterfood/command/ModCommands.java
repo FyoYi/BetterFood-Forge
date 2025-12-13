@@ -5,6 +5,8 @@ import com.fyoyi.betterfood.util.TimeManager;
 import com.fyoyi.betterfood.util.UserConfigManager;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -29,6 +31,9 @@ public class ModCommands {
 
                         // === 智能菜单 ===
                         .then(Commands.literal("menu").requires(s -> s.hasPermission(2)).executes(ctx -> showSetMenu(ctx.getSource())))
+
+                        // === 奖励菜单 ===
+                        .then(Commands.literal("bonus_menu").requires(s -> s.hasPermission(2)).executes(ctx -> showBonusMenu(ctx.getSource())))
 
                         // === 重载 ===
                         .then(Commands.literal("reload").requires(s -> s.hasPermission(2)).executes(ctx -> reloadConfig(ctx.getSource())))
@@ -83,6 +88,61 @@ public class ModCommands {
                                                     ctx.getSource().sendSuccess(() -> Component.literal("§a[设置成功] §f" + item.getDescriptionId() + " -> " + t), true);
                                                     return 1;
                                                 })
+                                        )
+                                )
+                        )
+
+                        // === 设置奖励 ===
+                        .then(Commands.literal("set_bonus").requires(s -> s.hasPermission(2))
+                                .then(Commands.argument("item", ItemArgument.item(event.getBuildContext()))
+                                        .then(Commands.argument("effect", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> {
+                                                    String[] effects = {"saturation", "regeneration", "absorption", "fire_resistance", "water_breathing", "luck"};
+                                                    for (String effect : effects) {
+                                                        builder.suggest(effect);
+                                                    }
+                                                    return builder.buildFuture();
+                                                })
+                                                .then(Commands.argument("chance", FloatArgumentType.floatArg(0.0f, 1.0f))
+                                                        .then(Commands.argument("duration", IntegerArgumentType.integer(0))
+                                                                .then(Commands.argument("amplifier", IntegerArgumentType.integer(0, 2))
+                                                                        .executes(ctx -> {
+                                                                            Item item = ItemArgument.getItem(ctx, "item").getItem();
+                                                                            
+                                                                            if (!item.isEdible()) {
+                                                                                ctx.getSource().sendFailure(Component.literal("错误：只能设置食物类物品！"));
+                                                                                return 0;
+                                                                            }
+                                                                            
+                                                                            String effectStr = StringArgumentType.getString(ctx, "effect");
+                                                                            float chance = FloatArgumentType.getFloat(ctx, "chance");
+                                                                            int duration = IntegerArgumentType.getInteger(ctx, "duration");
+                                                                            int amplifier = IntegerArgumentType.getInteger(ctx, "amplifier");
+                                                                            
+                                                                            // 解析效果类型
+                                                                            net.minecraft.world.effect.MobEffect effect = parseEffect(effectStr);
+                                                                            if (effect == null) {
+                                                                                ctx.getSource().sendFailure(Component.literal("错误：不支持的效果类型 '" + effectStr + "'"));
+                                                                                return 0;
+                                                                            }
+                                                                            
+                                                                            // 创建效果奖励
+                                                                            java.util.List<FoodConfig.EffectBonus> bonuses = new java.util.ArrayList<>();
+                                                                            bonuses.add(new FoodConfig.EffectBonus(effect, chance, duration, amplifier));
+                                                                            
+                                                                            // 保存到用户配置
+                                                                            UserConfigManager.saveBonusOverride(item, bonuses);
+                                                                            
+                                                                            // 注册到 FoodConfig
+                                                                            FoodConfig.registerBonus(item, bonuses);
+                                                                            
+                                                                            String effectName = getEffectChineseName(effectStr);
+                                                                            ctx.getSource().sendSuccess(() -> Component.literal("§a[奖励设置成功] §f" + item.getDescriptionId() + " -> " + effectName + " (概率:" + chance + ", 时间:" + duration + ", 等级:" + amplifier + ")"), true);
+                                                                            return 1;
+                                                                        })
+                                                                )
+                                                        )
+                                                )
                                         )
                                 )
                         )
@@ -186,6 +246,66 @@ public class ModCommands {
         return 1;
     }
 
+    private static int showBonusMenu(CommandSourceStack source) {
+        if (!(source.getEntity() instanceof Player player)) {
+            source.sendFailure(Component.literal("此指令只能由玩家执行"));
+            return 0;
+        }
+
+        ItemStack stack = player.getMainHandItem();
+        if (stack.isEmpty()) {
+            source.sendFailure(Component.literal("请先将物品拿在手上！"));
+            return 0;
+        }
+
+        Item item = stack.getItem();
+
+        if (!item.isEdible()) {
+            source.sendFailure(Component.literal("错误：当前手持的不是食物，无法设置奖励。"));
+            return 0;
+        }
+
+        String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
+
+        // --- 头部 ---
+        source.sendSuccess(() -> Component.literal("§m---------------------------------------------").withStyle(ChatFormatting.GRAY), false);
+        source.sendSuccess(() -> Component.literal(" §6[Better Food] §r奖励配置面板"), false);
+        source.sendSuccess(() -> Component.empty(), false); // 空行
+
+        // --- 信息显示 (悬停显示ID) ---
+        MutableComponent infoLine = Component.literal(" §7目标: ");
+        infoLine.append(Component.translatable(item.getDescriptionId())
+                .withStyle(s -> s.withColor(ChatFormatting.AQUA).withBold(true)
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(registryName)))));
+
+        source.sendSuccess(() -> infoLine, false);
+        source.sendSuccess(() -> Component.empty(), false);
+
+        // --- 效果按钮 (一行显示) ---
+        source.sendSuccess(() -> Component.literal(" §7效果类型:"), false);
+
+        MutableComponent effects = Component.literal(" ");
+        effects.append(makeBonusBtn("饱和", registryName, "saturation", ChatFormatting.GREEN));
+        effects.append(makeBonusBtn("生命恢复", registryName, "regeneration", ChatFormatting.RED));
+        effects.append(makeBonusBtn("伤害吸收", registryName, "absorption", ChatFormatting.YELLOW));
+        effects.append(makeBonusBtn("防火", registryName, "fire_resistance", ChatFormatting.GOLD));
+        effects.append(makeBonusBtn("水下呼吸", registryName, "water_breathing", ChatFormatting.BLUE));
+        effects.append(makeBonusBtn("幸运", registryName, "luck", ChatFormatting.LIGHT_PURPLE));
+        source.sendSuccess(() -> effects, false);
+
+        source.sendSuccess(() -> Component.empty(), false);
+
+        // --- 帮助信息 ---
+        source.sendSuccess(() -> Component.literal(" §7使用方法: 点击效果按钮后输入参数"), false);
+        source.sendSuccess(() -> Component.literal(" §7格式: /betterfood set_bonus <物品> <效果> <概率> <时间> <等级>"), false);
+        source.sendSuccess(() -> Component.literal(" §7示例: /betterfood set_bonus " + registryName + " saturation 0.8 10 0"), false);
+
+        // --- 尾部 ---
+        source.sendSuccess(() -> Component.literal("§m---------------------------------------------").withStyle(ChatFormatting.GRAY), false);
+
+        return 1;
+    }
+
     private static String getDurationText(Item item) {
         long ticks = FoodConfig.getItemLifetime(new ItemStack(item));
         if (ticks == -1) return "§6永久";
@@ -202,12 +322,46 @@ public class ModCommands {
         return btn.append(" "); // 加个空格间隔
     }
 
+    private static MutableComponent makeBonusBtn(String label, String itemId, String effect, ChatFormatting color) {
+        String cmd = "/betterfood set_bonus " + itemId + " " + effect + " ";
+        MutableComponent btn = Component.literal("[" + label + "]");
+        btn.withStyle(s -> s.withColor(color)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, cmd))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("点击后输入: 概率 时间 等级"))));
+        return btn.append(" "); // 加个空格间隔
+    }
+
+    private static net.minecraft.world.effect.MobEffect parseEffect(String effectStr) {
+        switch (effectStr.toLowerCase()) {
+            case "saturation": return net.minecraft.world.effect.MobEffects.SATURATION;
+            case "regeneration": return net.minecraft.world.effect.MobEffects.REGENERATION;
+            case "absorption": return net.minecraft.world.effect.MobEffects.ABSORPTION;
+            case "fire_resistance": return net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE;
+            case "water_breathing": return net.minecraft.world.effect.MobEffects.WATER_BREATHING;
+            case "luck": return net.minecraft.world.effect.MobEffects.LUCK;
+            default: return null;
+        }
+    }
+
+    private static String getEffectChineseName(String effectStr) {
+        switch (effectStr.toLowerCase()) {
+            case "saturation": return "饱和";
+            case "regeneration": return "生命恢复";
+            case "absorption": return "伤害吸收";
+            case "fire_resistance": return "防火";
+            case "water_breathing": return "水下呼吸";
+            case "luck": return "幸运";
+            default: return effectStr;
+        }
+    }
+
     // === 帮助菜单 ===
     private static int showHelp(CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal("§m---------------------------------------------").withStyle(ChatFormatting.GRAY), false);
         source.sendSuccess(() -> Component.literal(" §2Better Food 控制台"), false);
 
         sendClickable(source, " §b[设置手持物品]", "/betterfood menu", "打开当前食物的配置面板");
+        sendClickable(source, " §d[设置奖励效果]", "/betterfood bonus_menu", "打开当前食物的奖励配置面板");
         sendClickable(source, " §e[重载配置文件]", "/betterfood reload", "重新读取所有配置");
         sendClickable(source, " §c[初始化所有设置]", "/betterfood reset_all", "警告：删除所有自定义文件！");
 
