@@ -32,7 +32,7 @@ public class FoodEffectHandler {
             player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 25 * 20, 0));
             // 80% 几率二选一
             if (RANDOM.nextFloat() < 0.8f) {
-                applyRandomBadEffect(player, 5 * 20); // 5秒
+                applyRandomBadEffect(player, 10 * 20); // 5秒
             }
             return;
         }
