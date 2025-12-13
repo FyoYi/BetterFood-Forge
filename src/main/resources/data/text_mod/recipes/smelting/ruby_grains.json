@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:smelting",
-  "ingredient": {
-    "item": "text_mod:ruby_copper"
-  },
-  "result": "text_mod:ruby_grains",
-  "experience": 2.5,
-  "cookingtime": 200
-}

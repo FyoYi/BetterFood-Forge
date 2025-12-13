@@ -1,38 +1,32 @@
 package com.fyoyi.betterfood;
 
-import com.fyoyi.betterfood.creative_tab.ModCreativeModeTabs;
-import com.fyoyi.betterfood.item.ModItems;
 // === 核心工具类引用 ===
 import com.fyoyi.betterfood.util.FreshnessHelper;
 import com.fyoyi.betterfood.util.TimeManager;
-import com.fyoyi.betterfood.util.FoodExpiryManager; // JSON 读取器
-import com.fyoyi.betterfood.config.FoodConfig;     // 配置中心
+import com.fyoyi.betterfood.util.FoodExpiryManager;
+import com.fyoyi.betterfood.config.FoodConfig;
 // ====================
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Item;
-import net.minecraft.resources.ResourceLocation;
-import com.fyoyi.betterfood.item.weapon.bow.Bow_item;
+import net.minecraft.world.item.ItemStack;
+
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterItemDecorationsEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent; // 必须导入这个
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import com.fyoyi.betterfood.entity.ModEntities;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
-import com.fyoyi.betterfood.recipe.ModRecipes;
 import org.slf4j.Logger;
 
 @Mod(better_food.MOD_ID)
@@ -47,20 +41,11 @@ public class better_food
 
         modEventBus.addListener(this::commonSetup);
 
-        // 注册物品、实体、配方等
-        ModItems.init();
-        ModItems.register(modEventBus);
-        ModRecipes.register(modEventBus);
-        ModEntities.register(modEventBus);
-        ModCreativeModeTabs.register(modEventBus);
-
         // 注册服务端事件总线
         MinecraftForge.EVENT_BUS.register(this);
 
         // >>> 【核心】注册资源重载监听器 (用于读取 JSON 配置) <<<
         MinecraftForge.EVENT_BUS.addListener(this::addReloadListener);
-
-        modEventBus.addListener(this::addCreative);
 
         // 手动注册物品栏装饰器 (画耐久条)
         modEventBus.addListener(ClientModEvents::registerItemDecorations);
@@ -79,12 +64,8 @@ public class better_food
 
     // === 【新增】事件回调：添加 JSON 读取器 ===
     public void addReloadListener(AddReloadListenerEvent event) {
-        // 注册我们的 FoodExpiryManager，它会在游戏启动和 /reload 时读取数据包
+        // 注册 FoodExpiryManager，它现在会同时处理保质期和新鲜奖励
         event.addListener(new FoodExpiryManager());
-    }
-
-    private void addCreative(BuildCreativeModeTabContentsEvent event)
-    {
     }
 
     @SubscribeEvent
@@ -103,16 +84,6 @@ public class better_food
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             LOGGER.info("HELLO FROM CLIENT SETUP");
-            event.enqueueWork(() -> {
-                Item rubyInlaidBow = Bow_item.RUBY_INLAID_BOW.get();
-                ItemProperties.register(rubyInlaidBow, ResourceLocation.fromNamespaceAndPath("minecraft", "pull"), (stack, world, entity, seed) -> {
-                    if (entity == null) return 0.0F;
-                    return entity.getUseItem() != stack ? 0.0F : (float)(stack.getUseDuration() - entity.getUseItemRemainingTicks()) / 20.0F;
-                });
-                ItemProperties.register(rubyInlaidBow, ResourceLocation.fromNamespaceAndPath("minecraft", "pulling"), (stack, world, entity, seed) -> {
-                    return entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F;
-                });
-            });
         }
 
         // ========================================================
@@ -121,6 +92,15 @@ public class better_food
         @SubscribeEvent
         public static void onItemTooltip(net.minecraftforge.event.entity.player.ItemTooltipEvent event) {
             net.minecraft.world.item.ItemStack stack = event.getItemStack();
+
+            // 特殊处理：腐肉
+            if (stack.getItem() == net.minecraft.world.item.Items.ROTTEN_FLESH) {
+                event.getToolTip().add(Component.literal("新鲜度: 已腐烂").withStyle(ChatFormatting.DARK_RED));
+                event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.DARK_RED));
+                event.getToolTip().add(Component.literal(" - 100%概率获得饥饿 (25秒)").withStyle(ChatFormatting.DARK_RED));
+                event.getToolTip().add(Component.literal(" - 80%概率获得中毒/反胃 (5秒)").withStyle(ChatFormatting.DARK_RED));
+                return;
+            }
 
             // 只要腐烂开启，且是可腐烂食物 (FoodConfig 判断)，就显示
             if (TimeManager.DECAY_ENABLED && FoodConfig.canRot(stack)) {
@@ -131,6 +111,9 @@ public class better_food
                 // === 如果是无限保质期 (-1)，显示特殊文字并直接返回 ===
                 if (lifetime == FoodConfig.SHELF_LIFE_INFINITE) {
                     event.getToolTip().add(Component.literal("保质期: 永久保鲜").withStyle(ChatFormatting.GOLD));
+                    event.getToolTip().add(Component.literal("新鲜度: 永久新鲜").withStyle(ChatFormatting.AQUA));
+                    // 显示新鲜食物效果
+                    addFreshFoodEffects(event, stack);
                     return; // 不需要显示倒计时
                 }
 
@@ -162,7 +145,102 @@ public class better_food
                 else color = ChatFormatting.RED;
 
                 event.getToolTip().add(Component.literal("距离腐烂: " + remainStr).withStyle(color));
+
+                // 5. 显示新鲜度等级和对应效果
+                addFreshnessStatus(event, percent, stack);
             }
+        }
+
+        /**
+         * 添加新鲜度状态和食用效果提示
+         */
+        private static void addFreshnessStatus(net.minecraftforge.event.entity.player.ItemTooltipEvent event, float percent, ItemStack stack) {
+            String status;
+            ChatFormatting statusColor;
+            
+            // 新鲜度等级判定
+            if (percent >= 0.8f) {
+                status = "新鲜";
+                statusColor = ChatFormatting.GREEN;
+                event.getToolTip().add(Component.literal("新鲜度: " + status).withStyle(statusColor));
+                addFreshFoodEffects(event, stack);
+            } else if (percent >= 0.6f) {
+                status = "不新鲜";
+                statusColor = ChatFormatting.YELLOW;
+                event.getToolTip().add(Component.literal("新鲜度: " + status).withStyle(statusColor));
+                event.getToolTip().add(Component.literal("食用效果: 无").withStyle(ChatFormatting.GRAY));
+            } else if (percent >= 0.4f) {
+                status = "略微变质";
+                statusColor = ChatFormatting.GOLD;
+                event.getToolTip().add(Component.literal("新鲜度: " + status).withStyle(statusColor));
+                event.getToolTip().add(Component.literal("食用效果: 30%概率获得饥饿 (10秒)").withStyle(ChatFormatting.GOLD));
+            } else if (percent >= 0.2f) {
+                status = "变质";
+                statusColor = ChatFormatting.RED;
+                event.getToolTip().add(Component.literal("新鲜度: " + status).withStyle(statusColor));
+                event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.RED));
+                event.getToolTip().add(Component.literal(" - 50%概率获得饥饿 (15秒)").withStyle(ChatFormatting.RED));
+                event.getToolTip().add(Component.literal(" - 10%概率获得中毒/反胃 (5秒)").withStyle(ChatFormatting.RED));
+            } else {
+                status = "严重变质";
+                statusColor = ChatFormatting.DARK_RED;
+                event.getToolTip().add(Component.literal("新鲜度: " + status).withStyle(statusColor));
+                event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.DARK_RED));
+                event.getToolTip().add(Component.literal(" - 80%概率获得饥饿 (20秒)").withStyle(ChatFormatting.DARK_RED));
+                event.getToolTip().add(Component.literal(" - 50%概率获得中毒/反胃 (5秒)").withStyle(ChatFormatting.DARK_RED));
+            }
+        }
+
+        /**
+         * 添加新鲜食物的奖励效果提示
+         */
+        private static void addFreshFoodEffects(net.minecraftforge.event.entity.player.ItemTooltipEvent event, ItemStack stack) {
+            java.util.List<FoodConfig.EffectBonus> bonuses = FoodConfig.getBonusEffects(stack);
+            if (bonuses != null && !bonuses.isEmpty()) {
+                event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.LIGHT_PURPLE));
+                for (FoodConfig.EffectBonus bonus : bonuses) {
+                    int chancePercent = (int)(bonus.chance * 100);
+                    String effectName = getEffectName(bonus.effect);
+                    String amplifierStr = bonus.amplifier > 0 ? (" " + toRoman(bonus.amplifier + 1)) : "";
+                    event.getToolTip().add(Component.literal(" - " + chancePercent + "%概率获得" + effectName + amplifierStr + " (" + bonus.durationSeconds + "秒)").withStyle(ChatFormatting.LIGHT_PURPLE));
+                }
+            } else {
+                event.getToolTip().add(Component.literal("食用效果: 无额外效果").withStyle(ChatFormatting.GRAY));
+            }
+        }
+
+        /**
+         * 获取效果名称 (中文)
+         */
+        private static String getEffectName(net.minecraft.world.effect.MobEffect effect) {
+            if (effect == net.minecraft.world.effect.MobEffects.SATURATION) return "饱和";
+            if (effect == net.minecraft.world.effect.MobEffects.REGENERATION) return "生命恢复";
+            if (effect == net.minecraft.world.effect.MobEffects.ABSORPTION) return "伤害吸收";
+            if (effect == net.minecraft.world.effect.MobEffects.HEALTH_BOOST) return "生命提升";
+            if (effect == net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED) return "速度";
+            if (effect == net.minecraft.world.effect.MobEffects.DIG_SPEED) return "急迫";
+            if (effect == net.minecraft.world.effect.MobEffects.DAMAGE_BOOST) return "力量";
+            if (effect == net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE) return "抗性提升";
+            if (effect == net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE) return "防火";
+            if (effect == net.minecraft.world.effect.MobEffects.WATER_BREATHING) return "水下呼吸";
+            if (effect == net.minecraft.world.effect.MobEffects.NIGHT_VISION) return "夜视";
+            if (effect == net.minecraft.world.effect.MobEffects.JUMP) return "跳跃提升";
+            if (effect == net.minecraft.world.effect.MobEffects.LUCK) return "幸运";
+            return effect.getDescriptionId();
+        }
+
+        /**
+         * 将数字转为罗马数字 (1=I, 2=II, 3=III, ...)
+         */
+        private static String toRoman(int number) {
+            return switch (number) {
+                case 1 -> "I";
+                case 2 -> "II";
+                case 3 -> "III";
+                case 4 -> "IV";
+                case 5 -> "V";
+                default -> String.valueOf(number);
+            };
         }
 
         // ========================================================

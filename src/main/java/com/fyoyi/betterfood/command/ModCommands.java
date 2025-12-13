@@ -67,7 +67,7 @@ public class ModCommands {
                                                 .executes(ctx -> {
                                                     Item item = ItemArgument.getItem(ctx, "item").getItem();
 
-                                                    // 【校验 1】必须是食物
+                                                    // 必须是食物
                                                     if (!item.isEdible()) {
                                                         ctx.getSource().sendFailure(Component.literal("错误：只能设置食物类物品！"));
                                                         return 0;
@@ -112,7 +112,6 @@ public class ModCommands {
         );
     }
 
-    // === 核心：美化版智能菜单 ===
     private static int showSetMenu(CommandSourceStack source) {
         if (!(source.getEntity() instanceof Player player)) {
             source.sendFailure(Component.literal("此指令只能由玩家执行"));

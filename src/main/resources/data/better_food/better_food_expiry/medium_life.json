@@ -1,11 +1,41 @@
 {
   "ticks": 288000,
   "items": [
-    "minecraft:bread",
+    {
+      "item": "minecraft:bread",
+      "effects": [
+        {
+          "effect": "saturation",
+          "chance": 0.6,
+          "duration": 3,
+          "amplifier": 0
+        }
+      ]
+    },
     "minecraft:cookie",
-    "minecraft:carrot",
+    {
+      "item": "minecraft:carrot",
+      "effects": [
+        {
+          "effect": "saturation",
+          "chance": 0.5,
+          "duration": 2,
+          "amplifier": 0
+        }
+      ]
+    },
     "minecraft:potato",
-    "minecraft:baked_potato",
+    {
+      "item": "minecraft:baked_potato",
+      "effects": [
+        {
+          "effect": "saturation",
+          "chance": 0.6,
+          "duration": 3,
+          "amplifier": 0
+        }
+      ]
+    },
     "minecraft:beetroot",
     "minecraft:dried_kelp"
   ]

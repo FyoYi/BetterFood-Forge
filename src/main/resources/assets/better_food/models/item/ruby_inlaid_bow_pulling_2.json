@@ -1,6 +1,0 @@
-{
-  "parent": "better_food:item/ruby_inlaid_bow",
-  "textures": {
-    "layer0": "better_food:item/weapon/bow/ruby_inlaid_bow_pulling_2"
-  }
-}

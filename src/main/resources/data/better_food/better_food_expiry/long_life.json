@@ -2,7 +2,39 @@
   "ticks": 1200000,
   "items": [
     "minecraft:honey_bottle",
-    "minecraft:golden_apple",
-    "minecraft:golden_carrot"
+    {
+      "item": "minecraft:golden_apple",
+      "effects": [
+        {
+          "effect": "saturation",
+          "chance": 1.0,
+          "duration": 10,
+          "amplifier": 1
+        },
+        {
+          "effect": "regeneration",
+          "chance": 0.8,
+          "duration": 5,
+          "amplifier": 1
+        },
+        {
+          "effect": "absorption",
+          "chance": 0.6,
+          "duration": 30,
+          "amplifier": 0
+        }
+      ]
+    },
+    {
+      "item": "minecraft:golden_carrot",
+      "effects": [
+        {
+          "effect": "saturation",
+          "chance": 1.0,
+          "duration": 8,
+          "amplifier": 0
+        }
+      ]
+    }
   ]
 }
