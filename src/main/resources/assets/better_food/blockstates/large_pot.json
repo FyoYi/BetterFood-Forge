@@ -1,0 +1,60 @@
+{
+  "multipart": [
+    {
+      "when": { "has_lid": "false", "facing": "north" },
+      "apply": { 
+        "model": "better_food:block/large_pot",
+        "y": 0
+      }
+    },
+    {
+      "when": { "has_lid": "false", "facing": "east" },
+      "apply": { 
+        "model": "better_food:block/large_pot",
+        "y": 90
+      }
+    },
+    {
+      "when": { "has_lid": "false", "facing": "south" },
+      "apply": { 
+        "model": "better_food:block/large_pot",
+        "y": 180
+      }
+    },
+    {
+      "when": { "has_lid": "false", "facing": "west" },
+      "apply": { 
+        "model": "better_food:block/large_pot",
+        "y": 270
+      }
+    },
+    {
+      "when": { "has_lid": "true", "facing": "north" },
+      "apply": { 
+        "model": "better_food:block/large_pot_lid",
+        "y": 0
+      }
+    },
+    {
+      "when": { "has_lid": "true", "facing": "east" },
+      "apply": { 
+        "model": "better_food:block/large_pot_lid",
+        "y": 90
+      }
+    },
+    {
+      "when": { "has_lid": "true", "facing": "south" },
+      "apply": { 
+        "model": "better_food:block/large_pot_lid",
+        "y": 180
+      }
+    },
+    {
+      "when": { "has_lid": "true", "facing": "west" },
+      "apply": { 
+        "model": "better_food:block/large_pot_lid",
+        "y": 270
+      }
+    }
+  ]
+}

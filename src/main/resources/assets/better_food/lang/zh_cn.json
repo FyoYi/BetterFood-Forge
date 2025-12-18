@@ -1,4 +1,6 @@
 {
   "creativemodetab.better_food_tab": "更好的食物",
-  "block.better_food.cooking_pan": "平底锅"
+  "block.better_food.cooking_pan": "平底锅",
+  "block.better_food.large_pot": "大炖锅",
+  "block.better_food.lid": "锅盖"
 }

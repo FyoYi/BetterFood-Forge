@@ -1,6 +1,9 @@
 package com.fyoyi.betterfood.block;
 
 import com.fyoyi.betterfood.better_food;
+import com.fyoyi.betterfood.block.cooking_pan.SimpleFoodBlock;
+import com.fyoyi.betterfood.block.large_pot.LargePotBlock;
+import com.fyoyi.betterfood.block.lid.LidBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -16,6 +19,22 @@ public class ModBlocks {
 
     public static final RegistryObject<Block> COOKING_PAN =
             BLOCKS.register("cooking_pan", () -> new SimpleFoodBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.TERRACOTTA_ORANGE)
+                            .strength(2.0F, 2.0F)
+                            .sound(SoundType.METAL)
+            ));
+
+    public static final RegistryObject<Block> LARGE_POT =
+            BLOCKS.register("large_pot", () -> new LargePotBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.TERRACOTTA_ORANGE)
+                            .strength(2.0F, 2.0F)
+                            .sound(SoundType.METAL)
+            ));
+
+    public static final RegistryObject<Block> LID =
+            BLOCKS.register("lid", () -> new LidBlock(
                     BlockBehaviour.Properties.of()
                             .mapColor(MapColor.TERRACOTTA_ORANGE)
                             .strength(2.0F, 2.0F)

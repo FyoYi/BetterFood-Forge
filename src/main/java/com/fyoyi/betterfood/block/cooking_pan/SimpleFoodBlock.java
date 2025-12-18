@@ -1,4 +1,4 @@
-package com.fyoyi.betterfood.block;
+package com.fyoyi.betterfood.block.cooking_pan;
 
 import com.fyoyi.betterfood.block.entity.PotBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -21,12 +21,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class SimpleFoodBlock extends BaseEntityBlock {
 
-    public static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 6, 14);
+    // 优化平底锅的碰撞体积，更精确地匹配模型
+    private static final VoxelShape BOTTOM_SHAPE = Block.box(2, 0, 2, 14, 1, 14); // 底部
+    private static final VoxelShape NORTH_WALL = Block.box(2, 1, 2, 14, 4, 3); // 北墙
+    private static final VoxelShape SOUTH_WALL = Block.box(2, 1, 13, 14, 4, 14); // 南墙
+    private static final VoxelShape WEST_WALL = Block.box(2, 1, 3, 3, 4, 13); // 西墙
+    private static final VoxelShape EAST_WALL = Block.box(13, 1, 3, 14, 4, 13); // 东墙
+    private static final VoxelShape SHAPE = Shapes.or(BOTTOM_SHAPE, NORTH_WALL, SOUTH_WALL, WEST_WALL, EAST_WALL);
     public static final net.minecraft.world.level.block.state.properties.DirectionProperty FACING = net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING;
 
     public SimpleFoodBlock(Properties pProperties) {

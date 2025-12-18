@@ -6,6 +6,9 @@ package com.fyoyi.betterfood.item;
 
 import com.fyoyi.betterfood.better_food;
 import com.fyoyi.betterfood.block.ModBlocks;
+import com.fyoyi.betterfood.item.cooking_pan.PotBlockItem;
+import com.fyoyi.betterfood.item.large_pot.LargePotBlockItem;
+import com.fyoyi.betterfood.item.lid.LidBlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -24,6 +27,12 @@ public class ModItems {
      */
     public static final RegistryObject<Item> COOKING_PAN = ITEMS.register("cooking_pan",
             () -> new PotBlockItem(ModBlocks.COOKING_PAN.get(), new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> LARGE_POT = ITEMS.register("large_pot",
+            () -> new LargePotBlockItem(ModBlocks.LARGE_POT.get(), new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> LID = ITEMS.register("lid",
+            () -> new LidBlockItem(ModBlocks.LID.get(), new Item.Properties().stacksTo(1)));
 
     /*
      * 注册物品

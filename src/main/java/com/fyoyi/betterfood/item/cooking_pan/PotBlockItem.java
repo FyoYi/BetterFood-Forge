@@ -1,6 +1,6 @@
-package com.fyoyi.betterfood.item;
+package com.fyoyi.betterfood.item.cooking_pan;
 
-import com.fyoyi.betterfood.client.renderer.PotItemRenderer;
+import com.fyoyi.betterfood.client.renderer.cooking_pan.PotItemRenderer;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
