@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class LargePotItemRenderer extends BlockEntityWithoutLevelRenderer {
 
-    // 虚拟的 BlockEntity，用来骗过渲染器
     private final PotBlockEntity dummyEntity;
     private final LargePotBlockRenderer renderer;
 

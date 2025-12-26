@@ -93,12 +93,37 @@ public class SimpleFoodBlock extends BaseEntityBlock {
             }
         }
 
-        // 3. 放入/取出逻辑
+        // 3. 【核心修复】碗 -> 出锅 (之前漏了这里！)
+        if (handStack.getItem() == Items.BOWL) {
+            BlockEntity be = pLevel.getBlockEntity(pPos);
+            if (be instanceof PotBlockEntity pot) {
+                // 尝试出菜
+                ItemStack result = pot.serveDish();
+
+                if (!result.isEmpty()) {
+                    // 消耗碗
+                    if (!pPlayer.isCreative()) {
+                        handStack.shrink(1);
+                    }
+                    // 给予成品
+                    if (handStack.isEmpty()) {
+                        pPlayer.setItemInHand(pHand, result);
+                    } else if (!pPlayer.getInventory().add(result)) {
+                        pPlayer.drop(result, false);
+                    }
+
+                    pLevel.playSound(null, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    return InteractionResult.sidedSuccess(pLevel.isClientSide);
+                }
+            }
+        }
+
+        // 4. 放入逻辑 (限制为可食用)
         if (!pLevel.isClientSide) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
                 if (!handStack.isEmpty()) {
-                    // === 【核心修复】必须是可食用的物品才能放入 ===
+                    // 必须是食物才能放
                     if (handStack.getItem().isEdible()) {
                         boolean success = pot.pushItem(handStack);
                         if (success) {
@@ -109,6 +134,7 @@ public class SimpleFoodBlock extends BaseEntityBlock {
                         }
                     }
                 } else {
+                    // 空手取出
                     ItemStack takenItem = pot.popItem();
                     if (!takenItem.isEmpty()) {
                         if (!pPlayer.getInventory().add(takenItem)) {
@@ -123,6 +149,7 @@ public class SimpleFoodBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
+    // ... (onRemove, getShape, getStateForPlacement 等保持不变) ...
     @Override
     public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
         if (pState.getBlock() != pNewState.getBlock()) {

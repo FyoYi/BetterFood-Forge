@@ -73,8 +73,6 @@ public class LargePotBlockRenderer implements BlockEntityRenderer<PotBlockEntity
 
                 float orbitAngle = (animTime * 0.8f) + ((360.0f / activeCount) * currentRenderIndex) + randomOffset;
 
-                // === 【修复点】在这里加了 (float) 强转 ===
-                // Math.toRadians 返回 double，必须强转为 float 才能传给 Mth.cos
                 float x = 0.5f + currentRadius * Mth.cos((float)Math.toRadians(orbitAngle));
                 float z = 0.5f + currentRadius * Mth.sin((float)Math.toRadians(orbitAngle));
 

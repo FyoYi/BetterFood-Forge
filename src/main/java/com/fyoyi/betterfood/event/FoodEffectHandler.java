@@ -99,9 +99,6 @@ public class FoodEffectHandler {
         }
     }
 
-    /**
-     * 随机坏效果 (二选一)
-     */
     private static void applyRandomBadEffect(Player player, int duration) {
         if (RANDOM.nextBoolean()) {
             player.addEffect(new MobEffectInstance(MobEffects.POISON, duration, 0));

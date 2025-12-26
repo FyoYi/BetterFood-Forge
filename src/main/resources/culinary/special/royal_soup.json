@@ -1,0 +1,36 @@
+{
+  "type": "better_food:culinary_match",
+  "group": "soup",
+  "tier": "advanced",
+  "requirements": [
+    {
+      "classification": "汤食",
+      "count": 1,
+      "ideal_cookedness": 100.0,
+      "tolerance": 5.0
+    },
+    {
+      "classification": "肉类",
+      "count": 1,
+      "ideal_cookedness": 90.0,
+      "tolerance": 5.0
+    },
+    {
+      "classification": "黄金",
+      "count": 1,
+      "ideal_cookedness": 50.0,
+      "tolerance": 10.0
+    }
+  ],
+  "result": {
+    "item": "better_food:dish_bowl",
+    "count": 1
+  },
+  "naming_rules": [
+    {
+      "required_feature": "黄金",
+      "override_name": "皇家金汤",
+      "priority": 20
+    }
+  ]
+}

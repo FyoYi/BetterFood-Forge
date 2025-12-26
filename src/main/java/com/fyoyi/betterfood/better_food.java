@@ -7,19 +7,19 @@ package com.fyoyi.betterfood;
 // === 核心工具类引用 ===
 import com.fyoyi.betterfood.util.FreshnessHelper;
 import com.fyoyi.betterfood.util.TimeManager;
-import com.fyoyi.betterfood.util.FoodExpiryManager; // JSON 读取器
-import com.fyoyi.betterfood.config.FoodConfig;     // 配置中心
+import com.fyoyi.betterfood.util.FoodExpiryManager;
+import com.fyoyi.betterfood.config.FoodConfig;
 import com.fyoyi.betterfood.block.ModBlocks;
 import com.fyoyi.betterfood.item.ModItems;
 import com.fyoyi.betterfood.ModCreativeModeTabs;
-// ====================
 import com.fyoyi.betterfood.block.entity.ModBlockEntities;
-// === 渲染器 & GUI ===
 import com.fyoyi.betterfood.client.renderer.PotRendererDispatcher;
-import com.fyoyi.betterfood.client.gui.PotInfoOverlay; // 【新增】导入你的 HUD Overlay
+import com.fyoyi.betterfood.client.gui.PotInfoOverlay;
+import com.fyoyi.betterfood.recipe.CulinaryRecipe;
+import com.fyoyi.betterfood.recipe.ModRecipes;
+import com.fyoyi.betterfood.recipe.CulinaryRecipeSerializer;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent; // 【新增】GUI 注册事件
-// =============================
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
@@ -75,6 +75,7 @@ public class better_food
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModCreativeModeTabs.register(modEventBus);
+        ModRecipes.register(modEventBus);
 
         // 注册配置
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

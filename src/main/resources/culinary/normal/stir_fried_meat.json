@@ -1,0 +1,40 @@
+{
+  "type": "better_food:culinary_match",
+  "group": "stir_fry",
+  "tier": "basic",
+  "requirements": [
+    {
+      "classification": "肉类",
+      "count": 2,
+      "ideal_cookedness": 70.0,
+      "tolerance": 10.0
+    },
+    {
+      "classification": "蔬菜",
+      "count": 1,
+      "ideal_cookedness": 50.0,
+      "tolerance": 10.0
+    }
+  ],
+  "result": {
+    "item": "better_food:dish_plate",
+    "count": 1
+  },
+  "naming_rules": [
+    {
+      "required_feature": "牛肉",
+      "override_name": "小炒牛肉",
+      "priority": 10
+    },
+    {
+      "required_feature": "猪肉",
+      "override_name": "小炒肉片",
+      "priority": 10
+    },
+    {
+      "required_feature": "辣味",
+      "prefix": "麻辣",
+      "priority": 5
+    }
+  ]
+}
