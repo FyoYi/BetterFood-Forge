@@ -3,6 +3,7 @@ package com.fyoyi.betterfood.command;
 import com.fyoyi.betterfood.config.FoodConfig;
 import com.fyoyi.betterfood.util.TimeManager;
 import com.fyoyi.betterfood.util.UserConfigManager;
+import com.fyoyi.betterfood.util.CookednessHelper;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;

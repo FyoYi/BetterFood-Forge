@@ -43,17 +43,17 @@ authors="${mod_authors}" #optional
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-[v0.1.2] 版本简要说明
+[v0.2.0] 版本简要说明
 
 核心更新
-- 实装食物属性系统，支持分类、特点、性质三种属性标签
-- 为腐肉添加默认属性并优化显示效果
-- 优化奖励配置UI，提升操作体验
+- 实装翻炒出菜功能，使用木棍右键烹饪锅可检测可制作菜品
+- 3D文本显示，菜品提示信息显示在锅具上方并面向玩家
+- 优化锅具交互逻辑，支持翻炒动画和菜谱匹配
 
-代码优化
-- 清理无关内容，专注食物系统核心功能
-- 优化项目文件夹结构，提升代码可维护性
-- 修复多项UI显示和交互问题
+系统优化
+- 实现客户端-服务端消息同步机制
+- 重构渲染系统，提升显示效果和性能
+- 增强菜谱匹配算法，支持精确食材检测
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.${mod_id}]] #optional

@@ -2,6 +2,7 @@ package com.fyoyi.betterfood.item.cooking_pan;
 
 import com.fyoyi.betterfood.block.entity.PotBlockEntity;
 import com.fyoyi.betterfood.client.renderer.cooking_pan.PotItemRenderer;
+import com.fyoyi.betterfood.util.CookednessHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.CompoundTag;
@@ -56,10 +57,7 @@ public class PotBlockItem extends BlockItem {
                 for (int i = 3; i >= 0; i--) {
                     ItemStack foodStack = items.get(i);
                     if (!foodStack.isEmpty()) {
-                        float cooked = 0.0f;
-                        if (foodStack.hasTag() && foodStack.getTag().contains(PotBlockEntity.NBT_COOKED_PROGRESS)) {
-                            cooked = foodStack.getTag().getFloat(PotBlockEntity.NBT_COOKED_PROGRESS);
-                        }
+                        float cooked = CookednessHelper.getCurrentCookedness(foodStack);
 
                         // 3. 颜色逻辑：100%分界
                         ChatFormatting color = cooked >= 100.0f ? ChatFormatting.RED : ChatFormatting.GREEN;

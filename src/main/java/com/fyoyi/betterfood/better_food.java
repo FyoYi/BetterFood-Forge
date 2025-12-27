@@ -18,6 +18,8 @@ import com.fyoyi.betterfood.client.gui.PotInfoOverlay;
 import com.fyoyi.betterfood.recipe.CulinaryRecipe;
 import com.fyoyi.betterfood.recipe.ModRecipes;
 import com.fyoyi.betterfood.recipe.CulinaryRecipeSerializer;
+import com.fyoyi.betterfood.network.NetworkManager;
+import com.fyoyi.betterfood.client.renderer.PotWorldRenderer;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 
@@ -79,6 +81,12 @@ public class better_food
 
         // 注册配置
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
+        // 注册网络
+        NetworkManager.register();
+
+        // 注册世界渲染器
+        PotWorldRenderer.register();
 
         // ========================================================
         // 客户端相关注册 (手动监听 Mod 总线事件)
@@ -311,15 +319,9 @@ public class better_food
                 Set<String> features = new HashSet<>();
                 String nature = null;
 
-                // === 【核心修改 1】检查是否有动态熟度 NBT ===
-                boolean hasDynamicCooked = false;
-                float dynamicCooked = 0f;
-                // NBT Key 必须与 PotBlockEntity 里的一致
-                if (stack.hasTag() && stack.getTag().contains("BetterFood_CookedProgress")) {
-                    dynamicCooked = stack.getTag().getFloat("BetterFood_CookedProgress");
-                    hasDynamicCooked = true;
-                }
-                // ===========================================
+                // 使用CookednessHelper获取熟度信息
+                float currentCooked = com.fyoyi.betterfood.util.CookednessHelper.getCurrentCookedness(stack);
+                boolean hasDynamicCooked = com.fyoyi.betterfood.util.CookednessHelper.hasDynamicCookedness(stack);
 
                 for (String tag : tags) {
                     if (tag.startsWith("分类:")) {
@@ -327,20 +329,14 @@ public class better_food
                     } else if (tag.startsWith("特点:")) {
                         features.add(tag.substring(3));
                     } else if (tag.startsWith("熟度:")) {
-                        // === 【核心修改 2】如果有动态熟度，覆盖静态配置 ===
-                        if (hasDynamicCooked) {
-                            // 动态显示：保留1位小数，例如 "50.5%"
-                            nature = String.format("%.1f%%", dynamicCooked);
-                        } else {
-                            // 静态显示：读取 JSON 配置 (如 "0%" 或 "70%")
-                            nature = tag.substring(3);
-                        }
+                        // 使用CookednessHelper获取统一的熟度显示
+                        nature = com.fyoyi.betterfood.util.CookednessHelper.getCookednessDisplayString(stack);
                     }
                 }
 
                 // 如果 JSON 里没配熟度标签，但物品确实被煮过，也强制显示
                 if (nature == null && hasDynamicCooked) {
-                    nature = String.format("%.1f%%", dynamicCooked);
+                    nature = com.fyoyi.betterfood.util.CookednessHelper.getCookednessDisplayString(stack);
                 }
 
                 event.getToolTip().add(Component.literal("食物属性:").withStyle(ChatFormatting.AQUA));
@@ -358,11 +354,12 @@ public class better_food
                     event.getToolTip().add(Component.literal("特点: " + featuresStr.toString()).withStyle(ChatFormatting.GRAY));
                 }
                 if (nature != null) {
-                    // === 【核心修改 3】动态变色逻辑 ===
+                    // 使用CookednessHelper获取熟度值以确定颜色
+                    float cookedValue = com.fyoyi.betterfood.util.CookednessHelper.getCurrentCookedness(stack);
                     ChatFormatting natureColor = ChatFormatting.GRAY;
                     if (hasDynamicCooked) {
-                        if (dynamicCooked >= 100f) natureColor = ChatFormatting.RED;   // 熟了/焦了
-                        else if (dynamicCooked > 0f) natureColor = ChatFormatting.GREEN; // 正在煮
+                        if (cookedValue >= 100f) natureColor = ChatFormatting.RED;   // 熟了/焦了
+                        else if (cookedValue > 0f) natureColor = ChatFormatting.GREEN; // 正在煮
                     }
 
                     event.getToolTip().add(Component.literal("熟度: " + nature).withStyle(natureColor));

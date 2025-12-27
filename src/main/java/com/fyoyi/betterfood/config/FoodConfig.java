@@ -133,6 +133,26 @@ public class FoodConfig {
     }
     
     /**
+     * 获取食物的初始熟度值
+     */
+    public static float getInitialCookedness(ItemStack stack) {
+        if (stack.isEmpty()) return 0.0f;
+        
+        Set<String> tags = getFoodTags(stack);
+        for (String tag : tags) {
+            if (tag.startsWith("熟度:")) {
+                String cookedStr = tag.substring(3).replace("%", "").trim();
+                try {
+                    return Float.parseFloat(cookedStr);
+                } catch (NumberFormatException e) {
+                    return 0.0f;
+                }
+            }
+        }
+        return 0.0f;
+    }
+    
+    /**
      * 获取注册的食物数量
      */
     public static int getRegisteredFoodCount() {

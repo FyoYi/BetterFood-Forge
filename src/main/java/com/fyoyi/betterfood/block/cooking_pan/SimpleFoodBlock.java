@@ -2,8 +2,18 @@ package com.fyoyi.betterfood.block.cooking_pan;
 
 import com.fyoyi.betterfood.block.entity.ModBlockEntities;
 import com.fyoyi.betterfood.block.entity.PotBlockEntity;
+import com.fyoyi.betterfood.client.gui.PotInfoOverlay;
+import com.fyoyi.betterfood.config.FoodConfig;
+import com.fyoyi.betterfood.network.NetworkManager;
+import com.fyoyi.betterfood.network.PotMessagePacket;
+import com.fyoyi.betterfood.recipe.CulinaryRecipe;
+import com.fyoyi.betterfood.recipe.ModRecipes;
+import com.fyoyi.betterfood.util.CookednessHelper;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
@@ -13,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -28,6 +39,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Set;
 
 public class SimpleFoodBlock extends BaseEntityBlock {
 
@@ -83,34 +97,50 @@ public class SimpleFoodBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        // 2. 木棍翻炒
+        // =============================================================
+        // 【核心功能】木棍右键 -> 显示可能制作的菜品
+        // =============================================================
         if (handStack.getItem() == Items.STICK) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
                 pot.triggerFlip();
                 pLevel.playSound(pPlayer, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.5F, 1.5F);
+
+                if (!pLevel.isClientSide) {
+                    // 检查是否有匹配的菜谱
+                    List<CulinaryRecipe> recipes = pLevel.getRecipeManager()
+                            .getAllRecipesFor(ModRecipes.CULINARY_TYPE.get());
+                    
+                    CulinaryRecipe matchedRecipe = null;
+                    for (CulinaryRecipe recipe : recipes) {
+                        if (recipe.matches(pot, pLevel)) {
+                            matchedRecipe = recipe;
+                            break;
+                        }
+                    }
+                    
+                    boolean foundMatch = matchedRecipe != null;
+                    String message = foundMatch ? "✅ 可制作: " + matchedRecipe.getResultItem(pLevel.registryAccess()).getHoverName().getString() : "❌ 当前食材无法匹配任何菜谱";
+                    
+                    // 发送网络包到客户端，让消息显示在锅的上方
+                    if (pPlayer instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                        NetworkManager.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new PotMessagePacket(pPos, message));
+                    }
+                }
+
                 return InteractionResult.sidedSuccess(pLevel.isClientSide);
             }
         }
 
-        // 3. 【核心修复】碗 -> 出锅 (之前漏了这里！)
+        // 3. 碗 -> 出锅
         if (handStack.getItem() == Items.BOWL) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
-                // 尝试出菜
                 ItemStack result = pot.serveDish();
-
                 if (!result.isEmpty()) {
-                    // 消耗碗
-                    if (!pPlayer.isCreative()) {
-                        handStack.shrink(1);
-                    }
-                    // 给予成品
-                    if (handStack.isEmpty()) {
-                        pPlayer.setItemInHand(pHand, result);
-                    } else if (!pPlayer.getInventory().add(result)) {
-                        pPlayer.drop(result, false);
-                    }
+                    if (!pPlayer.isCreative()) handStack.shrink(1);
+                    if (handStack.isEmpty()) pPlayer.setItemInHand(pHand, result);
+                    else if (!pPlayer.getInventory().add(result)) pPlayer.drop(result, false);
 
                     pLevel.playSound(null, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0F, 1.0F);
                     return InteractionResult.sidedSuccess(pLevel.isClientSide);
@@ -123,23 +153,17 @@ public class SimpleFoodBlock extends BaseEntityBlock {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
                 if (!handStack.isEmpty()) {
-                    // 必须是食物才能放
                     if (handStack.getItem().isEdible()) {
                         boolean success = pot.pushItem(handStack);
                         if (success) {
                             pLevel.playSound(null, pPos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
-                            if (!pPlayer.isCreative()) {
-                                handStack.shrink(1);
-                            }
+                            if (!pPlayer.isCreative()) handStack.shrink(1);
                         }
                     }
                 } else {
-                    // 空手取出
                     ItemStack takenItem = pot.popItem();
                     if (!takenItem.isEmpty()) {
-                        if (!pPlayer.getInventory().add(takenItem)) {
-                            pPlayer.drop(takenItem, false);
-                        }
+                        if (!pPlayer.getInventory().add(takenItem)) pPlayer.drop(takenItem, false);
                         pLevel.playSound(null, pPos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                 }
@@ -149,7 +173,6 @@ public class SimpleFoodBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    // ... (onRemove, getShape, getStateForPlacement 等保持不变) ...
     @Override
     public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
         if (pState.getBlock() != pNewState.getBlock()) {

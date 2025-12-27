@@ -1,6 +1,7 @@
 package com.fyoyi.betterfood.client.gui;
 
 import com.fyoyi.betterfood.block.entity.PotBlockEntity;
+import com.fyoyi.betterfood.util.CookednessHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -16,13 +17,14 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 public class PotInfoOverlay implements IGuiOverlay {
     public static final PotInfoOverlay INSTANCE = new PotInfoOverlay();
-
+    
+    // 保留原有功能，用于显示锅内信息
     @Override
     public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
 
-        // 检测视线
+        // 检测视线（用于显示锅内信息）
         HitResult hit = mc.hitResult;
         if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
 
@@ -30,10 +32,11 @@ public class PotInfoOverlay implements IGuiOverlay {
         BlockEntity be = mc.level.getBlockEntity(blockHit.getBlockPos());
 
         if (be instanceof PotBlockEntity pot) {
+            // 显示锅内信息
             renderPotInfo(guiGraphics, mc.font, pot, screenWidth, screenHeight);
         }
     }
-
+    
     private void renderPotInfo(GuiGraphics graphics, Font font, PotBlockEntity pot, int width, int height) {
         NonNullList<ItemStack> items = pot.getItems();
 
@@ -48,10 +51,7 @@ public class PotInfoOverlay implements IGuiOverlay {
             ItemStack stack = items.get(i);
             if (stack.isEmpty()) continue;
 
-            float cooked = 0.0f;
-            if (stack.hasTag() && stack.getTag().contains(PotBlockEntity.NBT_COOKED_PROGRESS)) {
-                cooked = stack.getTag().getFloat(PotBlockEntity.NBT_COOKED_PROGRESS);
-            }
+            float cooked = CookednessHelper.getCurrentCookedness(stack);
 
             // 颜色逻辑
             ChatFormatting color = cooked >= 100.0f ? ChatFormatting.RED : ChatFormatting.GREEN;

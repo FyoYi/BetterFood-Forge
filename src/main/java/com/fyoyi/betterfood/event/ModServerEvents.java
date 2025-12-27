@@ -3,6 +3,7 @@ package com.fyoyi.betterfood.event;
 import com.fyoyi.betterfood.config.FoodConfig;
 import com.fyoyi.betterfood.util.FreshnessHelper;
 import com.fyoyi.betterfood.util.TimeManager;
+import com.fyoyi.betterfood.util.CookednessHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
@@ -185,8 +186,8 @@ public class ModServerEvents {
             // >>> 【核心修改】检查熟度是否一致 <<<
             // 如果熟度不一致，直接 return，禁止进入后续的新鲜度合并逻辑。
             // 这样 Minecraft 原版机制就会因为 NBT 不同而禁止它们堆叠。
-            float cooked1 = cursorStack.hasTag() ? cursorStack.getTag().getFloat("BetterFood_CookedProgress") : 0f;
-            float cooked2 = slotStack.hasTag() ? slotStack.getTag().getFloat("BetterFood_CookedProgress") : 0f;
+            float cooked1 = CookednessHelper.getCurrentCookedness(cursorStack);
+            float cooked2 = CookednessHelper.getCurrentCookedness(slotStack);
 
             // 允许极小的浮点误差 (0.01)，如果差值过大，视为不同熟度
             if (Math.abs(cooked1 - cooked2) > 0.01f) {
