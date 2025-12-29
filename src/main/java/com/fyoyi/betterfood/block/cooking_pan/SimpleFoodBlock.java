@@ -1,5 +1,4 @@
 package com.fyoyi.betterfood.block.cooking_pan;
-
 import com.fyoyi.betterfood.block.entity.ModBlockEntities;
 import com.fyoyi.betterfood.block.entity.PotBlockEntity;
 import com.fyoyi.betterfood.client.gui.PotInfoOverlay;
@@ -9,6 +8,7 @@ import com.fyoyi.betterfood.network.PotMessagePacket;
 import com.fyoyi.betterfood.recipe.CulinaryRecipe;
 import com.fyoyi.betterfood.recipe.ModRecipes;
 import com.fyoyi.betterfood.util.CookednessHelper;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -39,12 +39,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 import java.util.Set;
-
 public class SimpleFoodBlock extends BaseEntityBlock {
-
     private static final VoxelShape BOTTOM_SHAPE = Block.box(2, 0, 2, 14, 1, 14);
     private static final VoxelShape NORTH_WALL = Block.box(2, 1, 2, 14, 4, 3);
     private static final VoxelShape SOUTH_WALL = Block.box(2, 1, 13, 14, 4, 14);
@@ -52,6 +49,8 @@ public class SimpleFoodBlock extends BaseEntityBlock {
     private static final VoxelShape EAST_WALL = Block.box(13, 1, 3, 14, 4, 13);
     private static final VoxelShape SHAPE = Shapes.or(BOTTOM_SHAPE, NORTH_WALL, SOUTH_WALL, WEST_WALL, EAST_WALL);
     public static final net.minecraft.world.level.block.state.properties.DirectionProperty FACING = net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING;
+
+//boolean isHeating = PotBlockEntity.isHeated(level,pos);
 
     public SimpleFoodBlock(Properties pProperties) {
         super(pProperties);
@@ -97,20 +96,19 @@ public class SimpleFoodBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        // =============================================================
-        // 【核心功能】木棍右键 -> 显示可能制作的菜品
-        // =============================================================
         if (handStack.getItem() == Items.STICK) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
                 pot.triggerFlip();
-                pLevel.playSound(pPlayer, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.5F, 1.5F);
+                if(PotBlockEntity.isHeated(pLevel,pPos))
+                    pLevel.playSound(pPlayer, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.5F, 1.5F);
+                pLevel.playSound(pPlayer, pPos, SoundEvents.LANTERN_PLACE, SoundSource.BLOCKS, 1.0F, 2.5F);
 
                 if (!pLevel.isClientSide) {
                     // 检查是否有匹配的菜谱
                     List<CulinaryRecipe> recipes = pLevel.getRecipeManager()
                             .getAllRecipesFor(ModRecipes.CULINARY_TYPE.get());
-                    
+
                     CulinaryRecipe matchedRecipe = null;
                     for (CulinaryRecipe recipe : recipes) {
                         if (recipe.matches(pot, pLevel)) {
@@ -118,10 +116,10 @@ public class SimpleFoodBlock extends BaseEntityBlock {
                             break;
                         }
                     }
-                    
+
                     boolean foundMatch = matchedRecipe != null;
                     String message = foundMatch ? "✅ 可制作: " + matchedRecipe.getResultItem(pLevel.registryAccess()).getHoverName().getString() : "❌ 当前食材无法匹配任何菜谱";
-                    
+
                     // 发送网络包到客户端，让消息显示在锅的上方
                     if (pPlayer instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                         NetworkManager.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new PotMessagePacket(pPos, message));
@@ -132,7 +130,7 @@ public class SimpleFoodBlock extends BaseEntityBlock {
             }
         }
 
-        // 3. 碗 -> 出锅
+        // 碗 出锅
         if (handStack.getItem() == Items.BOWL) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
@@ -142,13 +140,14 @@ public class SimpleFoodBlock extends BaseEntityBlock {
                     if (handStack.isEmpty()) pPlayer.setItemInHand(pHand, result);
                     else if (!pPlayer.getInventory().add(result)) pPlayer.drop(result, false);
 
-                    pLevel.playSound(null, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    if(PotBlockEntity.isHeated(pLevel, pPos))
+                        pLevel.playSound(null, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0F, 1.0F);
                     return InteractionResult.sidedSuccess(pLevel.isClientSide);
                 }
             }
         }
 
-        // 4. 放入逻辑 (限制为可食用)
+        // 放入逻辑
         if (!pLevel.isClientSide) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
@@ -163,7 +162,8 @@ public class SimpleFoodBlock extends BaseEntityBlock {
                 } else {
                     ItemStack takenItem = pot.popItem();
                     if (!takenItem.isEmpty()) {
-                        if (!pPlayer.getInventory().add(takenItem)) pPlayer.drop(takenItem, false);
+                        if (!pPlayer.getInventory().add(takenItem))
+                            pPlayer.drop(takenItem, false);
                         pLevel.playSound(null, pPos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                 }

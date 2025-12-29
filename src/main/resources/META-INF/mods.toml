@@ -43,17 +43,15 @@ authors="${mod_authors}" #optional
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-[v0.2.0] 版本简要说明
+[v0.2.1] 版本简要说明
+这次主要把“锅气”做出来了，顺便修了几个陈年老Bug。
 
-核心更新
-- 实装翻炒出菜功能，使用木棍右键烹饪锅可检测可制作菜品
-- 3D文本显示，菜品提示信息显示在锅具上方并面向玩家
-- 优化锅具交互逻辑，支持翻炒动画和菜谱匹配
-
-系统优化
-- 实现客户端-服务端消息同步机制
-- 重构渲染系统，提升显示效果和性能
-- 增强菜谱匹配算法，支持精确食材检测
+1. 👂 听觉升级：现在的锅终于会“说话”了！入锅有滋啦声，加热有持续的油煎白噪音，翻锅时冷热锅声音也不同（冷锅那种啪叽一声很解压）。
+2. 🔥 视觉优化：调整了烟雾粒子，现在的油烟感更自然。
+3. 🐛 核心修复：
+   - 修复了“半熟食物放回锅里熟度变0”的恶性Bug。
+   - 修复了“自带熟度的食材（如烤马铃薯）入锅变成生食”的问题。
+   - 现在没煮过的食材拿出来可以和背包里的普通食材堆叠了。
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.${mod_id}]] #optional

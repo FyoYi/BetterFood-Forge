@@ -26,14 +26,16 @@ public class ModItems {
     public static final RegistryObject<Item> LID = ITEMS.register("lid",
             () -> new LidBlockItem(ModBlocks.LID.get(), new Item.Properties().stacksTo(1)));
 
-    // === 【新增】通用菜品载体 ===
-    // 盘装料理 (用于炒菜)
-    public static final RegistryObject<Item> DISH_PLATE = ITEMS.register("dish_plate",
-            () -> new Item(new Item.Properties().stacksTo(1).food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(6).saturationMod(0.6f).build())));
 
-    // 碗装料理 (用于炖汤)
-    public static final RegistryObject<Item> DISH_BOWL = ITEMS.register("dish_bowl",
-            () -> new Item(new Item.Properties().stacksTo(1).food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(6).saturationMod(0.6f).build())));
+    // 炒菜类
+    public static final RegistryObject<Item> STIR_FRIED_MEAT = ITEMS.register("stir_fried_meat",
+            () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(8).saturationMod(0.8f).build())));
+
+    public static final RegistryObject<Item> TEST_APPLE_SALAD = ITEMS.register("test_apple_salad",
+            () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(6).saturationMod(0.7f).build())));
+
+    public static final RegistryObject<Item> MIXED_STIR_FRY = ITEMS.register("mixed_stir_fry",
+            () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(7).saturationMod(0.75f).build())));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

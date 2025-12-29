@@ -44,6 +44,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.nbt.CompoundTag;
 import org.slf4j.Logger;
 
 import java.util.Set;
@@ -363,6 +364,21 @@ public class better_food
                     }
 
                     event.getToolTip().add(Component.literal("熟度: " + nature).withStyle(natureColor));
+                }
+            }
+            
+            // 显示菜品评分（如果存在）
+            if (stack.hasTag()) {
+                CompoundTag tag = stack.getTag();
+                if (tag.contains("DishScore")) {
+                    float score = tag.getFloat("DishScore");
+                    float avgFreshness = tag.getFloat("DishFreshness");
+                    float avgCookednessDeviation = tag.getFloat("DishCookednessDeviation");
+                    
+                    event.getToolTip().add(Component.literal("菜品评价:").withStyle(ChatFormatting.GOLD));
+                    event.getToolTip().add(Component.literal("  评分: " + String.format("%.1f", score) + "分").withStyle(ChatFormatting.WHITE));
+                    event.getToolTip().add(Component.literal("  平均新鲜度: " + String.format("%.1f", avgFreshness) + "%").withStyle(ChatFormatting.GRAY));
+                    event.getToolTip().add(Component.literal("  熟度偏差: " + String.format("%.1f", avgCookednessDeviation)).withStyle(ChatFormatting.GRAY));
                 }
             }
         }

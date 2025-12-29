@@ -1,24 +1,17 @@
 {
   "type": "better_food:culinary_match",
-  "group": "test",
+  "group": "salad",
   "tier": "basic",
   "requirements": [
     {
       "classification": "水果",
       "count": 1,
       "ideal_cookedness": 0.0,
-      "tolerance": 100.0
+      "tolerance": 100
     }
   ],
   "result": {
-    "item": "better_food:dish_plate",
+    "item": "better_food:test_apple_salad",
     "count": 1
-  },
-  "naming_rules": [
-    {
-      "required_feature": "甜食",
-      "override_name": "测试：甜苹果沙拉",
-      "priority": 100
-    }
-  ]
+  }
 }

@@ -1,15 +1,20 @@
 package com.fyoyi.betterfood.block.entity;
 
-import com.fyoyi.betterfood.config.FoodConfig;
 import com.fyoyi.betterfood.recipe.CulinaryRecipe;
 import com.fyoyi.betterfood.recipe.ModRecipes;
 import com.fyoyi.betterfood.util.CookednessHelper;
+import com.fyoyi.betterfood.util.FreshnessHelper;
+import com.fyoyi.betterfood.config.FoodConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
@@ -20,8 +25,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ public class PotBlockEntity extends BlockEntity implements Container {
     public static final int FLIP_ANIMATION_DURATION = 10;
     private int flipCount = 0;
 
+    // 效率: 底层100%, 二层50%, 三层20%, 顶层0%
     private static final float[] LAYER_EFFICIENCY = {1.0f, 0.5f, 0.2f, 0.0f};
     private static final float BASE_HEAT_PER_TICK = 0.1f;
 
@@ -46,23 +50,39 @@ public class PotBlockEntity extends BlockEntity implements Container {
 
     public static void tick(Level level, BlockPos pos, BlockState state, PotBlockEntity pEntity) {
         if (pEntity.flipTimer > 0) {
+            if (pEntity.flipTimer == FLIP_ANIMATION_DURATION && !pEntity.isEmpty()) {
+                level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.BLOCKS, 1.0F, 0.8F);
+            }
+
             if (pEntity.flipTimer == FLIP_ANIMATION_DURATION / 2) pEntity.cycleItemsOrder();
             pEntity.flipTimer--;
+
             if (pEntity.flipTimer == 0) {
                 pEntity.flipCount++;
                 pEntity.markUpdated();
+
+                if(!pEntity.isEmpty()) {
+                    if (isHeated(level, pos)) {
+                        pEntity.spawnBlackSmokeParticles();
+                        level.playSound(null, pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.5F, 1.5F);
+                    }
+                    level.playSound(null, pos, SoundEvents.MUD_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
             }
         }
 
+        // 2. 加热逻辑 (仅服务端)
         if (!level.isClientSide) {
             if (isHeated(level, pos)) {
-                pEntity.applyHeat();
+                pEntity.applyHeat(!pEntity.isEmpty());
             }
         }
     }
 
-    private void applyHeat() {
+    private void applyHeat(boolean haveFood) {
         boolean changed = false;
+
+        // 遍历所有物品进行加热
         for (int i = 0; i < items.size(); i++) {
             ItemStack stack = items.get(i);
             if (stack.isEmpty()) continue;
@@ -79,15 +99,104 @@ public class PotBlockEntity extends BlockEntity implements Container {
             }
         }
 
+        // 数据同步
         if (changed) {
             setChanged();
             if (this.level.getGameTime() % 20 == 0) {
                 this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
             }
         }
+
+        if (haveFood) {
+            // 滋滋声 / 爆裂声
+            if (this.level.getGameTime() % 2 == 0) {
+                float rng = this.level.random.nextFloat();
+                if (rng < 0.3f) {
+                    this.level.playSound(null, this.worldPosition, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.015F, 2.5F + (this.level.random.nextFloat() - 0.5F) * 0.5F);
+                } else if (rng < 0.6f) {
+                    this.level.playSound(null, this.worldPosition, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.035F, 2.0F + (this.level.random.nextFloat() - 0.5F) * 0.5F);
+                } else if (rng < 0.9f) {
+                    this.level.playSound(null, this.worldPosition, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 0.07F, 2.0F);
+                }
+            }
+            if (this.level.getGameTime() % 10 == 0 && this.level.random.nextFloat() < 0.1f) {
+                this.level.playSound(null, this.worldPosition, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.5F, 1.5F + this.level.random.nextFloat() * 0.5F);
+            }
+
+            if (this.level.getGameTime() % 5 == 0) {
+                spawnAmbientParticles();
+            }
+        }
+
+        // 锅体受热特效
+        if (this.level.getGameTime() % 20 == 0 && this.level.random.nextFloat() < 0.7f) {
+            this.level.playSound(null, this.worldPosition,
+                    SoundEvents.FIRE_AMBIENT,
+                    SoundSource.BLOCKS,
+                    0.3F, // 音量适中
+                    1.0F + this.level.random.nextFloat() * 0.4F // 音调
+            );
+        }
     }
 
-    // === 核心：出锅匹配 ===
+    // 翻锅时的烟雾
+    private void spawnBlackSmokeParticles() {
+        if (level instanceof ServerLevel serverLevel) {
+            BlockPos pos = this.getBlockPos();
+            double x = pos.getX() + 0.5;
+            double y = pos.getY() + 0.2;
+            double z = pos.getZ() + 0.5;
+            serverLevel.sendParticles(ParticleTypes.SMOKE, x, y, z, 5, 0.1, 0.1, 0.1, 0.05);
+        }
+    }
+
+    // 持续烹饪烟雾
+    private void spawnAmbientParticles() {
+        if (level instanceof ServerLevel serverLevel) {
+            BlockPos pos = this.getBlockPos();
+            double x = pos.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.3;
+            double y = pos.getY() + 0.3;
+            double z = pos.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.3;
+
+            serverLevel.sendParticles(ParticleTypes.SMOKE, x, y, z, 1, 0.0, 0.03, 0.0, 0.0);
+
+            if (level.random.nextFloat() < 0.1f) {
+                serverLevel.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 1, 0.0, 0.02, 0.0, 0.0);
+            }
+        }
+    }
+
+    // 入锅
+    public boolean pushItem(ItemStack stack) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).isEmpty()) {
+                ItemStack toAdd = stack.copy();
+                toAdd.setCount(1);
+
+                float currentVal = CookednessHelper.getCurrentCookedness(toAdd);
+                if (currentVal <= 0.0f) {
+                    float configInitialVal = getInitialCookednessFromConfig(toAdd);
+                    if (configInitialVal > 0) {
+                        CookednessHelper.setCookedness(toAdd, configInitialVal);
+                    }
+                }
+
+                items.set(i, toAdd);
+                markUpdated();
+
+                if (level != null && !level.isClientSide) {
+                    if(isHeated(this.level, this.worldPosition)) {
+                        level.playSound(null, this.worldPosition, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.4F, 1.8F);
+                        spawnBlackSmokeParticles();
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // === 出锅匹配 ===
     public ItemStack serveDish() {
         if (level == null || isEmpty()) return ItemStack.EMPTY;
 
@@ -99,13 +208,13 @@ public class PotBlockEntity extends BlockEntity implements Container {
         for (CulinaryRecipe recipe : recipes) {
             if (recipe.matches(this, level)) {
                 result = recipe.assemble(this, level.registryAccess());
+                applyEvaluationToResult(result);
                 break;
             }
         }
 
         if (result.isEmpty()) {
             result = new ItemStack(Items.MUSHROOM_STEW);
-            // result.setHoverName(net.minecraft.network.chat.Component.literal("奇怪的杂烩"));
         }
 
         this.clearContent();
@@ -113,82 +222,235 @@ public class PotBlockEntity extends BlockEntity implements Container {
         return result;
     }
 
-    // === 核心：入锅初始化 ===
-    public boolean pushItem(ItemStack stack) {
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).isEmpty()) {
-                ItemStack toAdd = stack.copy();
-                toAdd.setCount(1);
 
-                // 使用CookednessHelper设置初始熟度
-                float initialVal = CookednessHelper.getCurrentCookedness(toAdd);
-                if (initialVal > 0) {
-                    CookednessHelper.setCookedness(toAdd, initialVal);
+    private void applyEvaluationToResult(ItemStack result) {
+        if (result.isEmpty()) return;
+        List<CulinaryRecipe> recipes = this.level != null ?
+                this.level.getRecipeManager().getAllRecipesFor(ModRecipes.CULINARY_TYPE.get()) :
+                new ArrayList<>();
+        float avgFreshness = calculateAverageFreshness();
+        float avgCookednessDeviation = calculateAverageCookednessDeviation(recipes);
+        float score = calculateScore(avgFreshness, avgCookednessDeviation);
+        CompoundTag tag = result.getOrCreateTag();
+        tag.putFloat("DishScore", score);
+        tag.putFloat("DishFreshness", avgFreshness);
+        tag.putFloat("DishCookednessDeviation", avgCookednessDeviation);
+    }
+
+    private float calculateAverageFreshness() {
+        float total = 0;
+        int count = 0;
+        for (ItemStack s : items) {
+            if (s.isEmpty()) continue;
+            total += (FreshnessHelper.getFreshnessPercentage(this.level, s) * 100f >= 95f ? 100f : (FreshnessHelper.getFreshnessPercentage(this.level, s) * 100f / 95f) * 95f);
+            count++;
+        }
+        return count > 0 ? total / count : 0;
+    }
+
+    private float calculateAverageCookednessDeviation(List<CulinaryRecipe> recipes) {
+        float total = 0;
+        int count = 0;
+        for (ItemStack s : items) {
+            if (s.isEmpty()) continue;
+            float current = CookednessHelper.getCurrentCookedness(s);
+            float expected = 70.0f;
+            String cls = null;
+            Set<String> tags = FoodConfig.getFoodTags(s);
+            for(String t : tags) {
+                if(t.startsWith("分类:")) {
+                    cls = t.substring(3).trim();
+                    break;
                 }
-
-                items.set(i, toAdd);
-                markUpdated();
-                return true;
             }
+            if (cls != null) {
+                for (CulinaryRecipe r : recipes) {
+                    for (CulinaryRecipe.Requirement req : r.getRequirements()) {
+                        if (cls.equals(req.classification)) {
+                            expected = req.idealCookedness;
+                            break;
+                        }
+                    }
+                }
+            }
+            total += Math.abs(current - expected);
+            count++;
+        }
+        return count > 0 ? total / count : 0;
+    }
+
+    private float calculateScore(float f, float d) {
+        return Math.max(0, Math.min(100, f * 1.0f + d * -0.5f));
+    }
+
+    private float getInitialCookednessFromConfig(ItemStack s) {
+        try {
+            for(String t : FoodConfig.getFoodTags(s)) {
+                if(t.startsWith("熟度:")) {
+                    return Float.parseFloat(t.substring(3).replace("%","").trim());
+                }
+            }
+        } catch(Exception e){
+        }
+        return 0f;
+    }
+
+    public static boolean isHeated(Level l, BlockPos p) {
+        BlockState b = l.getBlockState(p.below());
+        if (b.is(Blocks.FIRE) || b.is(Blocks.SOUL_FIRE) || b.is(Blocks.LAVA) || b.is(Blocks.MAGMA_BLOCK)) {
+            return true;
+        }
+        if (b.getBlock() instanceof CampfireBlock && b.getValue(CampfireBlock.LIT)) {
+            return true;
         }
         return false;
     }
 
-    private float getInitialCookedness(ItemStack stack) {
-        return FoodConfig.getInitialCookedness(stack);
-    }
-
-    private static boolean isHeated(Level level, BlockPos pos) {
-        BlockState below = level.getBlockState(pos.below());
-        if (below.is(Blocks.FIRE) || below.is(Blocks.SOUL_FIRE) || below.is(Blocks.LAVA) || below.is(Blocks.MAGMA_BLOCK)) return true;
-        if (below.getBlock() instanceof CampfireBlock && below.getValue(CampfireBlock.LIT)) return true;
-        return false;
-    }
-
     private void cycleItemsOrder() {
-        List<ItemStack> temp = new ArrayList<>();
-        for (ItemStack stack : items) if (!stack.isEmpty()) temp.add(stack);
-        if (temp.size() < 2) return;
-        ItemStack bottomItem = temp.remove(0);
-        temp.add(bottomItem);
-        this.clearContent();
-        for (int i = 0; i < temp.size(); i++) items.set(i, temp.get(i));
+        List<ItemStack> t = new ArrayList<>();
+        for(ItemStack s : items) {
+            if(!s.isEmpty()) {
+                t.add(s);
+            }
+        }
+        if(t.size() < 2) {
+            return;
+        }
+        ItemStack b = t.remove(0);
+        t.add(b);
+        clearContent();
+        for(int i = 0; i < t.size(); i++) {
+            items.set(i, t.get(i));
+        }
         markUpdated();
     }
 
     public void markUpdated() {
         setChanged();
-        if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        if(level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
-    // NBT & Sync
-    @Override protected void saveAdditional(CompoundTag pTag) { super.saveAdditional(pTag); ContainerHelper.saveAllItems(pTag, items); pTag.putInt("FlipCount", flipCount); }
-    @Override public void load(CompoundTag pTag) { super.load(pTag); items.clear(); ContainerHelper.loadAllItems(pTag, items); if (pTag.contains("FlipCount")) flipCount = pTag.getInt("FlipCount"); }
-    @Override public CompoundTag getUpdateTag() { return saveWithoutMetadata(); }
-    @Nullable @Override public Packet<ClientGamePacketListener> getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
-    @Override public void onDataPacket(net.minecraft.network.Connection net, ClientboundBlockEntityDataPacket pkt) { this.load(pkt.getTag()); }
-
-    public void saveToItem(ItemStack stack) {
-        CompoundTag nbt = new CompoundTag();
-        ContainerHelper.saveAllItems(nbt, items);
-        nbt.putInt("FlipCount", flipCount);
-        boolean hasItem = false;
-        for(ItemStack s : items) if(!s.isEmpty()) hasItem = true;
-        if (hasItem) stack.addTagElement("BlockEntityTag", nbt);
+    @Override
+    protected void saveAdditional(CompoundTag t) {
+        super.saveAdditional(t);
+        ContainerHelper.saveAllItems(t, items);
+        t.putInt("FlipCount", flipCount);
     }
 
-    // Getters & Container Implementation
-    public int getFlipCount() { return flipCount; }
-    public void triggerFlip() { if (this.flipTimer == 0) this.flipTimer = FLIP_ANIMATION_DURATION; }
-    public float getFlipProgress(float partialTick) { if (flipTimer <= 0) return 0.0f; return (flipTimer - partialTick) / FLIP_ANIMATION_DURATION; }
-    public NonNullList<ItemStack> getItems() { return items; }
-    public ItemStack popItem() { for(int i=items.size()-1;i>=0;i--) if(!items.get(i).isEmpty()) { ItemStack s=items.get(i).copy(); items.set(i,ItemStack.EMPTY); markUpdated(); return s; } return ItemStack.EMPTY; }
-    @Override public int getContainerSize() { return items.size(); }
-    @Override public boolean isEmpty() { for (ItemStack item : items) if (!item.isEmpty()) return false; return true; }
-    @Override public ItemStack getItem(int index) { return items.get(index); }
-    @Override public ItemStack removeItem(int index, int count) { return ContainerHelper.removeItem(items, index, count); }
-    @Override public ItemStack removeItemNoUpdate(int index) { return ContainerHelper.takeItem(items, index); }
-    @Override public void setItem(int index, ItemStack stack) { items.set(index, stack); if (stack.getCount() > getMaxStackSize()) stack.setCount(getMaxStackSize()); }
-    @Override public boolean stillValid(Player player) { return Container.stillValidBlockEntity(this, player); }
-    @Override public void clearContent() { items.clear(); }
+    @Override
+    public void load(CompoundTag t) {
+        super.load(t);
+        items.clear();
+        ContainerHelper.loadAllItems(t, items);
+        if(t.contains("FlipCount")) {
+            flipCount = t.getInt("FlipCount");
+        }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(net.minecraft.network.Connection n, ClientboundBlockEntityDataPacket p) {
+        this.load(p.getTag());
+    }
+
+    public void saveToItem(ItemStack s) {
+        CompoundTag t = new CompoundTag();
+        ContainerHelper.saveAllItems(t, items);
+        t.putInt("FlipCount", flipCount);
+        if(!isEmpty()) {
+            s.addTagElement("BlockEntityTag", t);
+        }
+    }
+
+    public int getFlipCount() {
+        return flipCount;
+    }
+
+    public void triggerFlip() {
+        if(flipTimer == 0) {
+            flipTimer = FLIP_ANIMATION_DURATION;
+        }
+    }
+
+    public float getFlipProgress(float p) {
+        if(flipTimer <= 0) return 0f;
+        return (flipTimer - p) / FLIP_ANIMATION_DURATION;
+    }
+
+    public NonNullList<ItemStack> getItems() {
+        return items;
+    }
+
+    public ItemStack popItem() {
+        for(int i = items.size()-1; i >= 0; i--) {
+            if(!items.get(i).isEmpty()) {
+                ItemStack s = items.get(i).copy();
+                items.set(i, ItemStack.EMPTY);
+                markUpdated();
+                return s;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public int getContainerSize() {
+        return items.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for(ItemStack s : items) {
+            if(!s.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack getItem(int i) {
+        return items.get(i);
+    }
+
+    @Override
+    public ItemStack removeItem(int i, int c) {
+        return ContainerHelper.removeItem(items, i, c);
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int i) {
+        return ContainerHelper.takeItem(items, i);
+    }
+
+    @Override
+    public void setItem(int i, ItemStack s) {
+        items.set(i, s);
+        if(s.getCount() > getMaxStackSize()) {
+            s.setCount(getMaxStackSize());
+        }
+    }
+
+    @Override
+    public boolean stillValid(Player p) {
+        return Container.stillValidBlockEntity(this, p);
+    }
+
+    @Override
+    public void clearContent() {
+        items.clear();
+    }
+
 }
