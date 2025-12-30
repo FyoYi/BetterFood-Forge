@@ -31,6 +31,7 @@ public class ModCreativeModeTabs {
                     .displayItems((parameters, output) -> {
                         // 添加物品到创造模式物品栏
                         output.accept(ModItems.COOKING_PAN.get());
+                        output.accept(ModItems.SPATULA.get());
                         output.accept(ModItems.LARGE_POT.get());
                         output.accept(ModItems.LID.get());
                     })

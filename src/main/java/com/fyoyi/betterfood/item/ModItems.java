@@ -5,8 +5,7 @@ import com.fyoyi.betterfood.block.ModBlocks;
 import com.fyoyi.betterfood.item.cooking_pan.PotBlockItem;
 import com.fyoyi.betterfood.item.large_pot.LargePotBlockItem;
 import com.fyoyi.betterfood.item.lid.LidBlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items; // 导入原版物品
+import net.minecraft.world.item.*;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -19,6 +18,14 @@ public class ModItems {
     // 锅具
     public static final RegistryObject<Item> COOKING_PAN = ITEMS.register("cooking_pan",
             () -> new PotBlockItem(ModBlocks.COOKING_PAN.get(), new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> SPATULA = ITEMS.register("spatula",
+            ()-> new ShovelItem(
+                    Tiers.IRON,
+                    1.5f,
+                    -3.0f,
+                    new Item.Properties()
+            ));
 
     public static final RegistryObject<Item> LARGE_POT = ITEMS.register("large_pot",
             () -> new LargePotBlockItem(ModBlocks.LARGE_POT.get(), new Item.Properties().stacksTo(1)));

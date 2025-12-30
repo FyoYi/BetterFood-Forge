@@ -3,6 +3,7 @@ import com.fyoyi.betterfood.block.entity.ModBlockEntities;
 import com.fyoyi.betterfood.block.entity.PotBlockEntity;
 import com.fyoyi.betterfood.client.gui.PotInfoOverlay;
 import com.fyoyi.betterfood.config.FoodConfig;
+import com.fyoyi.betterfood.item.ModItems;
 import com.fyoyi.betterfood.network.NetworkManager;
 import com.fyoyi.betterfood.network.PotMessagePacket;
 import com.fyoyi.betterfood.recipe.CulinaryRecipe;
@@ -96,13 +97,17 @@ public class SimpleFoodBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        if (handStack.getItem() == Items.STICK) {
+        if (handStack.getItem() == ModItems.SPATULA.get()) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof PotBlockEntity pot) {
                 pot.triggerFlip();
                 if(PotBlockEntity.isHeated(pLevel,pPos))
                     pLevel.playSound(pPlayer, pPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.5F, 1.5F);
                 pLevel.playSound(pPlayer, pPos, SoundEvents.LANTERN_PLACE, SoundSource.BLOCKS, 1.0F, 2.5F);
+
+                handStack.hurtAndBreak(1,pPlayer,(player)->{
+                    player.broadcastBreakEvent(pHand);
+                });
 
                 if (!pLevel.isClientSide) {
                     // 检查是否有匹配的菜谱

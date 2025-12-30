@@ -112,15 +112,39 @@ public class PotBlockEntity extends BlockEntity implements Container {
             if (this.level.getGameTime() % 2 == 0) {
                 float rng = this.level.random.nextFloat();
                 if (rng < 0.3f) {
-                    this.level.playSound(null, this.worldPosition, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.015F, 2.5F + (this.level.random.nextFloat() - 0.5F) * 0.5F);
+                    this.level.playSound(
+                            null,
+                            this.worldPosition,
+                            SoundEvents.GENERIC_EXTINGUISH_FIRE,
+                            SoundSource.BLOCKS,
+                            0.015F,
+                            2.5F + (this.level.random.nextFloat() - 0.5F) * 0.5F);
                 } else if (rng < 0.6f) {
-                    this.level.playSound(null, this.worldPosition, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.035F, 2.0F + (this.level.random.nextFloat() - 0.5F) * 0.5F);
+                    this.level.playSound(
+                            null,
+                            this.worldPosition,
+                            SoundEvents.REDSTONE_TORCH_BURNOUT,
+                            SoundSource.BLOCKS,
+                            0.035F,
+                            2.0F + (this.level.random.nextFloat() - 0.5F) * 0.5F);
                 } else if (rng < 0.9f) {
-                    this.level.playSound(null, this.worldPosition, SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, 0.07F, 2.0F);
+                    this.level.playSound(
+                            null,
+                            this.worldPosition,
+                            SoundEvents.CANDLE_EXTINGUISH,
+                            SoundSource.BLOCKS,
+                            0.07F,
+                            2.0F);
                 }
             }
             if (this.level.getGameTime() % 10 == 0 && this.level.random.nextFloat() < 0.1f) {
-                this.level.playSound(null, this.worldPosition, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.5F, 1.5F + this.level.random.nextFloat() * 0.5F);
+                this.level.playSound(
+                        null,
+                        this.worldPosition,
+                        SoundEvents.LAVA_POP,
+                        SoundSource.BLOCKS,
+                        0.5F,
+                        1.5F + this.level.random.nextFloat() * 0.5F);
             }
 
             if (this.level.getGameTime() % 5 == 0) {
