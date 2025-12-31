@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "better_food:block/placed_bowl"
+    },
+    "facing=east": {
+      "model": "better_food:block/placed_bowl",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "better_food:block/placed_bowl",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "better_food:block/placed_bowl",
+      "y": 270
+    }
+  }
+}

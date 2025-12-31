@@ -27,6 +27,9 @@ public class ModItems {
                     new Item.Properties()
             ));
 
+    public static final RegistryObject<Item> OIL_BOWL = ITEMS.register("oil_bowl",
+            () -> new BlockItem(ModBlocks.OIL_BOWL.get(), new Item.Properties().stacksTo(1).durability(4)));
+
     public static final RegistryObject<Item> LARGE_POT = ITEMS.register("large_pot",
             () -> new LargePotBlockItem(ModBlocks.LARGE_POT.get(), new Item.Properties().stacksTo(1)));
 

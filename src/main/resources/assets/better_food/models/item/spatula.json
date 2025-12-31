@@ -2,5 +2,11 @@
   "parent": "item/generated",
   "textures": {
     "layer0": "better_food:item/spatula"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": { "better_food:oily": 1.0 },
+      "model": "better_food:item/oily_spatula"
+    }
+  ]
 }

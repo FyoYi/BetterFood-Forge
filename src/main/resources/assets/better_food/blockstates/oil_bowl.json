@@ -1,0 +1,23 @@
+{
+  "variants": {
+    "facing=north,layers=4": { "model": "better_food:block/oil_bowl_4" },
+    "facing=east,layers=4":  { "model": "better_food:block/oil_bowl_4", "y": 90 },
+    "facing=south,layers=4": { "model": "better_food:block/oil_bowl_4", "y": 180 },
+    "facing=west,layers=4":  { "model": "better_food:block/oil_bowl_4", "y": 270 },
+
+    "facing=north,layers=3": { "model": "better_food:block/oil_bowl_3" },
+    "facing=east,layers=3":  { "model": "better_food:block/oil_bowl_3", "y": 90 },
+    "facing=south,layers=3": { "model": "better_food:block/oil_bowl_3", "y": 180 },
+    "facing=west,layers=3":  { "model": "better_food:block/oil_bowl_3", "y": 270 },
+
+    "facing=north,layers=2": { "model": "better_food:block/oil_bowl_2" },
+    "facing=east,layers=2":  { "model": "better_food:block/oil_bowl_2", "y": 90 },
+    "facing=south,layers=2": { "model": "better_food:block/oil_bowl_2", "y": 180 },
+    "facing=west,layers=2":  { "model": "better_food:block/oil_bowl_2", "y": 270 },
+
+    "facing=north,layers=1": { "model": "better_food:block/oil_bowl_1" },
+    "facing=east,layers=1":  { "model": "better_food:block/oil_bowl_1", "y": 90 },
+    "facing=south,layers=1": { "model": "better_food:block/oil_bowl_1", "y": 180 },
+    "facing=west,layers=1":  { "model": "better_food:block/oil_bowl_1", "y": 270 }
+  }
+}

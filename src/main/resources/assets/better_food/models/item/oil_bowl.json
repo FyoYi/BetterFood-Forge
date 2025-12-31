@@ -1,0 +1,12 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "better_food:item/oil_bowl_full"
+  },
+  "overrides": [
+    {
+      "predicate": { "damage": 0.25 },
+      "model": "better_food:item/oil_bowl_half"
+    }
+  ]
+}

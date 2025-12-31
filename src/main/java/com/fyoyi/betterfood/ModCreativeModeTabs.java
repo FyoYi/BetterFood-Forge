@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.item.Items;
 
 public class ModCreativeModeTabs {
     /*
@@ -31,9 +32,11 @@ public class ModCreativeModeTabs {
                     .displayItems((parameters, output) -> {
                         // 添加物品到创造模式物品栏
                         output.accept(ModItems.COOKING_PAN.get());
-                        output.accept(ModItems.SPATULA.get());
                         output.accept(ModItems.LARGE_POT.get());
                         output.accept(ModItems.LID.get());
+                        output.accept(ModItems.SPATULA.get());
+                        output.accept(Items.BOWL);
+                        output.accept(ModItems.OIL_BOWL.get());
                     })
                     .build());
 

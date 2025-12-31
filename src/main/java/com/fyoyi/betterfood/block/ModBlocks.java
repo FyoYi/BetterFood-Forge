@@ -12,6 +12,8 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import com.fyoyi.betterfood.block.bowl.PlacedBowlBlock;
+import com.fyoyi.betterfood.block.bowl.OilBowlBlock;
 
 public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
@@ -39,6 +41,19 @@ public class ModBlocks {
                             .mapColor(MapColor.TERRACOTTA_ORANGE)
                             .strength(2.0F, 2.0F)
                             .sound(SoundType.METAL)
+            ));
+
+    public static final RegistryObject<Block> PLACED_BOWL =
+            BLOCKS.register("placed_bowl", () -> new PlacedBowlBlock(
+                    net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
+                            .noOcclusion() // 防止透视
+                            .strength(1.0f) // 硬度
+            ));
+
+    public static final RegistryObject<Block> OIL_BOWL =
+            BLOCKS.register("oil_bowl", () -> new OilBowlBlock(
+                    net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
+                            .noOcclusion().strength(1.0f)
             ));
 
     public static void register(IEventBus eventBus) {
