@@ -1,8 +1,23 @@
 {
   "variants": {
-    "facing=north": { "model": "better_food:block/cooking_pan" },
-    "facing=east":  { "model": "better_food:block/cooking_pan", "y": 90 },
-    "facing=south": { "model": "better_food:block/cooking_pan", "y": 180 },
-    "facing=west":  { "model": "better_food:block/cooking_pan", "y": 270 }
+    "facing=north,has_oil=false,is_heated=false": { "model": "better_food:block/cooking_pan" },
+    "facing=east,has_oil=false,is_heated=false":  { "model": "better_food:block/cooking_pan", "y": 90 },
+    "facing=south,has_oil=false,is_heated=false": { "model": "better_food:block/cooking_pan", "y": 180 },
+    "facing=west,has_oil=false,is_heated=false":  { "model": "better_food:block/cooking_pan", "y": 270 },
+
+    "facing=north,has_oil=false,is_heated=true": { "model": "better_food:block/cooking_pan" },
+    "facing=east,has_oil=false,is_heated=true":  { "model": "better_food:block/cooking_pan", "y": 90 },
+    "facing=south,has_oil=false,is_heated=true": { "model": "better_food:block/cooking_pan", "y": 180 },
+    "facing=west,has_oil=false,is_heated=true":  { "model": "better_food:block/cooking_pan", "y": 270 },
+
+    "facing=north,has_oil=true,is_heated=false":  { "model": "better_food:block/cooking_pan_oily_static" },
+    "facing=east,has_oil=true,is_heated=false":   { "model": "better_food:block/cooking_pan_oily_static", "y": 90 },
+    "facing=south,has_oil=true,is_heated=false":  { "model": "better_food:block/cooking_pan_oily_static", "y": 180 },
+    "facing=west,has_oil=true,is_heated=false":   { "model": "better_food:block/cooking_pan_oily_static", "y": 270 },
+    
+    "facing=north,has_oil=true,is_heated=true":  { "model": "better_food:block/cooking_pan_oily" },
+    "facing=east,has_oil=true,is_heated=true":   { "model": "better_food:block/cooking_pan_oily", "y": 90 },
+    "facing=south,has_oil=true,is_heated=true":  { "model": "better_food:block/cooking_pan_oily", "y": 180 },
+    "facing=west,has_oil=true,is_heated=true":   { "model": "better_food:block/cooking_pan_oily", "y": 270 }
   }
 }

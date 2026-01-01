@@ -111,23 +111,19 @@ public class better_food
         LOGGER.info("HELLO from server starting");
     }
 
-    // =================================================================
-    // 内部类 1: 客户端 Mod 总线事件
-    // =================================================================
     public static class ClientModEvents
     {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             LOGGER.info("HELLO FROM CLIENT SETUP");
 
-            // === 【核心修复】注册物品属性覆盖 (Item Properties) ===
             // 这让锅铲在有 "IsOily" NBT 时能够切换贴图
             event.enqueueWork(() -> {
                 net.minecraft.client.renderer.item.ItemProperties.register(
                         ModItems.SPATULA.get(),
-                        new ResourceLocation(MOD_ID, "oily"), // 对应 JSON 里的 predicate: better_food:oily
+                        new ResourceLocation(MOD_ID, "oily"),
                         (stack, level, entity, seed) -> {
-                            // 如果 NBT 里有 "IsOily" 且为 true，返回 1.0 (启用变体)
+
                             return (stack.hasTag() && stack.getTag().getBoolean("IsOily")) ? 1.0F : 0.0F;
                         });
             });

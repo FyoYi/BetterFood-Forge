@@ -1,8 +1,9 @@
 {
-  "credit": "Made with Blockbench",
   "parent": "block/block",
+  "render_type": "minecraft:cutout",
   "textures": {
     "0": "better_food:block/cooking_pan",
+    "oil": "better_food:block/oil_sizzling",
     "particle": "better_food:block/cooking_pan"
   },
   "display": {
@@ -15,6 +16,14 @@
     "head": { "rotation": [178, 89, 8], "translation": [0, -1.5, -0.25], "scale": [1.41, 1.39, 1.41] }
   },
   "elements": [
+    {
+      "name": "油面",
+      "from": [2.8, 1.05, 2.8],
+      "to": [12.5, 1.05, 12],
+      "faces": {
+        "up": {"uv": [0, 0, 4.5, 4.5], "texture": "#oil"}
+      }
+    },
     {
       "name": "锅底",
       "from": [3, 0, 3],

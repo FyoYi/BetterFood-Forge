@@ -72,7 +72,7 @@ public class OilBowlBlock extends HorizontalDirectionalBlock {
                     level.setBlock(pos, emptyBowlState, 3);
                 }
 
-                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
+                level.playSound(null, pos, SoundEvents.MUD_BREAK, SoundSource.BLOCKS, 1.0F, 1.2F);
             }
             return InteractionResult.SUCCESS;
         }
@@ -89,7 +89,7 @@ public class OilBowlBlock extends HorizontalDirectionalBlock {
                     // 2. 增加方块油量
                     level.setBlock(pos, state.setValue(LAYERS, currentLayers + 1), 3);
 
-                    level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    level.playSound(null, pos, SoundEvents.MUD_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
                 }
                 return InteractionResult.SUCCESS;
             }
