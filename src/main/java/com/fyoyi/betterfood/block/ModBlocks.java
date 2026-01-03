@@ -4,6 +4,7 @@ import com.fyoyi.betterfood.better_food;
 import com.fyoyi.betterfood.block.cooking_pan.SimpleFoodBlock;
 import com.fyoyi.betterfood.block.large_pot.LargePotBlock;
 import com.fyoyi.betterfood.block.lid.LidBlock;
+import com.fyoyi.betterfood.block.cutting_board.CuttingBoardBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -41,6 +42,13 @@ public class ModBlocks {
                             .mapColor(MapColor.TERRACOTTA_ORANGE)
                             .strength(2.0F, 2.0F)
                             .sound(SoundType.METAL)
+            ));
+
+    public static final RegistryObject<Block> CUTTING_BOARD =
+            BLOCKS.register("cutting_board", () -> new CuttingBoardBlock(
+                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).sound(SoundType.WOOD)
+                            .strength(1.5F, 1.5F) // 硬度和抗爆性
+                            .noOcclusion() // 防止被视为完整方块导致周围变黑
             ));
 
     public static final RegistryObject<Block> PLACED_BOWL =

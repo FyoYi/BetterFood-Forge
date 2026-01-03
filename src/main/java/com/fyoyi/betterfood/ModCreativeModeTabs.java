@@ -34,6 +34,7 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.COOKING_PAN.get());
                         output.accept(ModItems.LARGE_POT.get());
                         output.accept(ModItems.LID.get());
+                        output.accept(ModItems.CUTTING_BOARD.get());
                         output.accept(ModItems.SPATULA.get());
                         output.accept(Items.BOWL);
                         output.accept(ModItems.OIL_BOWL.get());

@@ -36,6 +36,9 @@ public class ModItems {
     public static final RegistryObject<Item> LID = ITEMS.register("lid",
             () -> new LidBlockItem(ModBlocks.LID.get(), new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> CUTTING_BOARD = ITEMS.register("cutting_board",
+            () -> new BlockItem(ModBlocks.CUTTING_BOARD.get(), new Item.Properties()));
+
 
     // 炒菜类
     public static final RegistryObject<Item> STIR_FRIED_MEAT = ITEMS.register("stir_fried_meat",
