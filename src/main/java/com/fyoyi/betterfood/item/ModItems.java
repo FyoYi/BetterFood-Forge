@@ -5,6 +5,7 @@ import com.fyoyi.betterfood.block.ModBlocks;
 import com.fyoyi.betterfood.item.cooking_pan.PotBlockItem;
 import com.fyoyi.betterfood.item.large_pot.LargePotBlockItem;
 import com.fyoyi.betterfood.item.lid.LidBlockItem;
+import com.fyoyi.betterfood.item.knife.KnifeItem;
 import net.minecraft.world.item.*;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -24,6 +25,13 @@ public class ModItems {
                     Tiers.IRON,
                     1.5f,
                     -3.0f,
+                    new Item.Properties()
+            ));
+
+    public static final RegistryObject<Item> KNIFE = ITEMS.register("knife",
+            () -> new KnifeItem(Tiers.IRON,
+                    2,
+                    -1.8F,
                     new Item.Properties()
             ));
 

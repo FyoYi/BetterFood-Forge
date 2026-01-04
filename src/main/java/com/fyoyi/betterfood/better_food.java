@@ -21,6 +21,7 @@ import com.fyoyi.betterfood.client.gui.PotInfoOverlay;
 import com.fyoyi.betterfood.recipe.ModRecipes;
 import com.fyoyi.betterfood.network.NetworkManager;
 import com.fyoyi.betterfood.client.renderer.PotWorldRenderer;
+import com.fyoyi.betterfood.client.renderer.cutting_board.CuttingBoardBlockRenderer;
 
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -121,9 +122,8 @@ public class better_food
             event.enqueueWork(() -> {
                 net.minecraft.client.renderer.item.ItemProperties.register(
                         ModItems.SPATULA.get(),
-                        new ResourceLocation(MOD_ID, "oily"),
+                        ResourceLocation.fromNamespaceAndPath(MOD_ID, "oily"),
                         (stack, level, entity, seed) -> {
-
                             return (stack.hasTag() && stack.getTag().getBoolean("IsOily")) ? 1.0F : 0.0F;
                         });
             });
@@ -131,6 +131,7 @@ public class better_food
 
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.POT_BE.get(), PotRendererDispatcher::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.CUTTING_BOARD_BE.get(), CuttingBoardBlockRenderer::new);
         }
 
         public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
