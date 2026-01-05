@@ -3,6 +3,7 @@ package com.fyoyi.betterfood.item;
 import com.fyoyi.betterfood.better_food;
 import com.fyoyi.betterfood.block.ModBlocks;
 import com.fyoyi.betterfood.item.cooking_pan.PotBlockItem;
+import com.fyoyi.betterfood.item.cutting_board.CuttingBoardBlockItem;
 import com.fyoyi.betterfood.item.large_pot.LargePotBlockItem;
 import com.fyoyi.betterfood.item.lid.LidBlockItem;
 import com.fyoyi.betterfood.item.knife.KnifeItem;
@@ -16,7 +17,6 @@ public class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, better_food.MOD_ID);
 
-    // 锅具
     public static final RegistryObject<Item> COOKING_PAN = ITEMS.register("cooking_pan",
             () -> new PotBlockItem(ModBlocks.COOKING_PAN.get(), new Item.Properties().stacksTo(1)));
 
@@ -45,10 +45,9 @@ public class ModItems {
             () -> new LidBlockItem(ModBlocks.LID.get(), new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> CUTTING_BOARD = ITEMS.register("cutting_board",
-            () -> new BlockItem(ModBlocks.CUTTING_BOARD.get(), new Item.Properties()));
+            () -> new CuttingBoardBlockItem(ModBlocks.CUTTING_BOARD.get(), new Item.Properties()));
 
 
-    // 炒菜类
     public static final RegistryObject<Item> STIR_FRIED_MEAT = ITEMS.register("stir_fried_meat",
             () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(8).saturationMod(0.8f).build())));
 
