@@ -53,7 +53,8 @@ public class ModServerEvents {
 
                 // 3. 检查上方是否是空气或可替换方块（比如草）
                 // 并且检查有没有东西挡住（比如玩家站在上面）
-                if (level.getBlockState(placePos).canBeReplaced() && level.isUnobstructed(level.getBlockState(placePos), placePos, net.minecraft.world.phys.shapes.CollisionContext.empty())) {
+                if (level.getBlockState(placePos).canBeReplaced() && level.isUnobstructed(level.getBlockState(placePos),
+                        placePos, net.minecraft.world.phys.shapes.CollisionContext.empty())) {
 
                     // 4. 只在服务端执行放置，客户端返回成功以显示手臂动画
                     if (!level.isClientSide) {
@@ -68,7 +69,8 @@ public class ModServerEvents {
                         level.setBlock(placePos, newState, 3);
 
                         // 播放音效
-                        level.playSound(null, placePos, net.minecraft.sounds.SoundEvents.WOOD_PLACE, net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                        level.playSound(null, placePos, net.minecraft.sounds.SoundEvents.WOOD_PLACE,
+                                net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
 
                         // 扣除物品 (生存模式)
                         if (!event.getEntity().isCreative()) {
@@ -92,7 +94,8 @@ public class ModServerEvents {
                 AbstractContainerMenu menu = event.player.containerMenu;
                 if (menu != null) {
                     for (Slot slot : menu.slots) {
-                        if (slot.hasItem()) checkAndReplace(event.player.level(), slot);
+                        if (slot.hasItem())
+                            checkAndReplace(event.player.level(), slot);
                     }
                 }
             }
@@ -101,7 +104,8 @@ public class ModServerEvents {
 
     @SubscribeEvent
     public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !event.level.isClientSide && event.level instanceof ServerLevel serverLevel) {
+        if (event.phase == TickEvent.Phase.END && !event.level.isClientSide
+                && event.level instanceof ServerLevel serverLevel) {
             if (event.level.getGameTime() % 40 == 0) {
                 for (Entity entity : serverLevel.getAllEntities()) {
                     if (entity instanceof ItemEntity itemEntity) {
@@ -146,7 +150,8 @@ public class ModServerEvents {
         if (!event.getEntity().level().isClientSide) {
             AbstractContainerMenu menu = event.getContainer();
             for (Slot slot : menu.slots) {
-                if (slot.hasItem()) checkAndReplace(event.getEntity().level(), slot);
+                if (slot.hasItem())
+                    checkAndReplace(event.getEntity().level(), slot);
             }
         }
     }
@@ -199,27 +204,33 @@ public class ModServerEvents {
 
     @SubscribeEvent
     public static void onItemStackedOnOther(ItemStackedOnOtherEvent event) {
-        if (!TimeManager.DECAY_ENABLED) return;
+        if (!TimeManager.DECAY_ENABLED)
+            return;
 
         ItemStack cursorStack = event.getCarriedItem();
         ItemStack slotStack = event.getStackedOnItem();
         ClickAction action = event.getClickAction();
         net.minecraft.world.level.Level level = event.getPlayer().level();
 
-        if (FoodConfig.canRot(cursorStack) && FoodConfig.canRot(slotStack) && ItemStack.isSameItem(cursorStack, slotStack)) {
+        if (FoodConfig.canRot(cursorStack) && FoodConfig.canRot(slotStack)
+                && ItemStack.isSameItem(cursorStack, slotStack)) {
             float cooked1 = CookednessHelper.getCurrentCookedness(cursorStack);
             float cooked2 = CookednessHelper.getCurrentCookedness(slotStack);
-            if (Math.abs(cooked1 - cooked2) > 0.01f) return;
+            if (Math.abs(cooked1 - cooked2) > 0.01f)
+                return;
 
-            if (ItemStack.isSameItemSameTags(cursorStack, slotStack)) return;
+            if (ItemStack.isSameItemSameTags(cursorStack, slotStack))
+                return;
 
-            if (action == ClickAction.PRIMARY) return;
+            if (action == ClickAction.PRIMARY)
+                return;
 
             if (action == ClickAction.SECONDARY) {
                 int maxStack = slotStack.getMaxStackSize();
                 int currentSlotCount = slotStack.getCount();
                 int space = maxStack - currentSlotCount;
-                if (space <= 0) return;
+                if (space <= 0)
+                    return;
 
                 int amountToMove = Math.min(cursorStack.getCount(), space);
                 if (amountToMove > 0) {
@@ -237,6 +248,136 @@ public class ModServerEvents {
                     if (event.getPlayer() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                         serverPlayer.containerMenu.sendAllDataToRemote();
                     }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityItemPickup(net.minecraftforge.event.entity.player.EntityItemPickupEvent event) {
+        if (!TimeManager.DECAY_ENABLED)
+            return;
+
+        Player player = event.getEntity();
+        ItemEntity itemEntity = event.getItem();
+        ItemStack pickedStack = itemEntity.getItem();
+        Level level = player.level();
+
+        if (!FoodConfig.canRot(pickedStack))
+            return;
+
+        // 查找背包中是否有可以堆叠的相同食物
+        boolean foundMatch = false;
+        ItemStack remainingStack = pickedStack.copy();
+
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            if (remainingStack.isEmpty())
+                break;
+
+            ItemStack slotStack = player.getInventory().getItem(i);
+            if (slotStack.isEmpty())
+                continue;
+
+            if (FoodConfig.canRot(slotStack) && ItemStack.isSameItem(remainingStack, slotStack)) {
+                float cookedPicked = CookednessHelper.getCurrentCookedness(remainingStack);
+                float cookedSlot = CookednessHelper.getCurrentCookedness(slotStack);
+                if (Math.abs(cookedPicked - cookedSlot) > 0.01f)
+                    continue; // 熟度不同，不堆叠
+
+                float freshPicked = FreshnessHelper.getFreshnessPercentage(level, remainingStack);
+                float freshSlot = FreshnessHelper.getFreshnessPercentage(level, slotStack);
+                if (Math.abs(freshPicked - freshSlot) > 0.1f)
+                    continue; // 新鲜度差距超过10%，不堆叠
+
+                // 可以堆叠，计算平均新鲜度
+                int pickedCount = remainingStack.getCount();
+                int slotCount = slotStack.getCount();
+                int maxStack = slotStack.getMaxStackSize();
+                int space = maxStack - slotCount;
+                if (space <= 0)
+                    continue;
+
+                int amountToMove = Math.min(pickedCount, space);
+                long expiryPicked = FreshnessHelper.getExpiryTime(level, remainingStack, true);
+                long expirySlot = FreshnessHelper.getExpiryTime(level, slotStack, true);
+                long weightSlot = expirySlot * slotCount;
+                long weightIncoming = expiryPicked * amountToMove;
+                long newAverageExpiry = (weightSlot + weightIncoming) / (slotCount + amountToMove);
+
+                slotStack.grow(amountToMove);
+                FreshnessHelper.setExpiryTime(slotStack, newAverageExpiry);
+                remainingStack.shrink(amountToMove);
+
+                foundMatch = true;
+            }
+        }
+
+        // 如果找到匹配并成功堆叠
+        if (foundMatch) {
+            if (remainingStack.isEmpty()) {
+                // 完全堆叠，移除地上的物品实体，取消默认拾取
+                itemEntity.discard();
+                event.setCanceled(true);
+            } else {
+                // 部分堆叠，更新地上物品实体的数量
+                itemEntity.setItem(remainingStack);
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    private static void mergeSimilarFoodSlots(Player player, Level level) {
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack1 = player.getInventory().getItem(i);
+            if (stack1.isEmpty() || !FoodConfig.canRot(stack1))
+                continue;
+
+            for (int j = i + 1; j < player.getInventory().getContainerSize(); j++) {
+                ItemStack stack2 = player.getInventory().getItem(j);
+                if (stack2.isEmpty() || !ItemStack.isSameItem(stack1, stack2))
+                    continue;
+
+                float cooked1 = CookednessHelper.getCurrentCookedness(stack1);
+                float cooked2 = CookednessHelper.getCurrentCookedness(stack2);
+                if (Math.abs(cooked1 - cooked2) > 0.01f)
+                    continue;
+
+                float fresh1 = FreshnessHelper.getFreshnessPercentage(level, stack1);
+                float fresh2 = FreshnessHelper.getFreshnessPercentage(level, stack2);
+                if (Math.abs(fresh1 - fresh2) > 0.1f)
+                    continue;
+
+                // 可以合并，计算平均新鲜度
+                int count1 = stack1.getCount();
+                int count2 = stack2.getCount();
+                int totalCount = count1 + count2;
+                int maxStack = stack1.getMaxStackSize();
+
+                if (totalCount <= maxStack) {
+                    // 完全合并到stack1
+                    long expiry1 = FreshnessHelper.getExpiryTime(level, stack1, true);
+                    long expiry2 = FreshnessHelper.getExpiryTime(level, stack2, true);
+                    long weight1 = expiry1 * count1;
+                    long weight2 = expiry2 * count2;
+                    long newAverageExpiry = (weight1 + weight2) / totalCount;
+
+                    stack1.setCount(totalCount);
+                    FreshnessHelper.setExpiryTime(stack1, newAverageExpiry);
+                    player.getInventory().setItem(j, ItemStack.EMPTY);
+                } else {
+                    // 部分合并
+                    int space = maxStack - count1;
+                    int amountToMove = Math.min(space, count2);
+
+                    long expiry1 = FreshnessHelper.getExpiryTime(level, stack1, true);
+                    long expiry2 = FreshnessHelper.getExpiryTime(level, stack2, true);
+                    long weight1 = expiry1 * count1;
+                    long weight2 = expiry2 * amountToMove;
+                    long newAverageExpiry = (weight1 + weight2) / (count1 + amountToMove);
+
+                    stack1.setCount(maxStack);
+                    FreshnessHelper.setExpiryTime(stack1, newAverageExpiry);
+                    stack2.shrink(amountToMove);
                 }
             }
         }

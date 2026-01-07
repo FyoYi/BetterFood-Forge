@@ -45,16 +45,18 @@ public class CuttingBoardBlock extends BaseEntityBlock {
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-        return createTickerHelper(pBlockEntityType, ModBlockEntities.CUTTING_BOARD_BE.get(), CuttingBoardBlockEntity::tick);
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState,
+            BlockEntityType<T> pBlockEntityType) {
+        return createTickerHelper(pBlockEntityType, ModBlockEntities.CUTTING_BOARD_BE.get(),
+                CuttingBoardBlockEntity::tick);
     }
 
     @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (pHand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand,
+            BlockHitResult pHit) {
         BlockEntity be = pLevel.getBlockEntity(pPos);
-        if (!(be instanceof CuttingBoardBlockEntity cuttingBoard)) return InteractionResult.FAIL;
+        if (!(be instanceof CuttingBoardBlockEntity cuttingBoard))
+            return InteractionResult.FAIL;
 
         ItemStack handStack = pPlayer.getItemInHand(pHand);
 
@@ -63,7 +65,8 @@ public class CuttingBoardBlock extends BaseEntityBlock {
             if (!pLevel.isClientSide) {
                 ItemStack boardStack = new ItemStack(this);
                 cuttingBoard.saveToItem(boardStack);
-                if (!pPlayer.getInventory().add(boardStack)) pPlayer.drop(boardStack, false);
+                if (!pPlayer.getInventory().add(boardStack))
+                    pPlayer.drop(boardStack, false);
                 cuttingBoard.clearContent();
                 pLevel.removeBlock(pPos, false);
                 pLevel.playSound(null, pPos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8f, 1.0f);
@@ -106,7 +109,8 @@ public class CuttingBoardBlock extends BaseEntityBlock {
         if (!handStack.isEmpty() && handStack.is(ModTags.Items.CUTTABLE_FOODS)) {
             if (cuttingBoard.addItem(handStack.copy().split(1))) {
                 if (!pLevel.isClientSide) {
-                    if (!pPlayer.getAbilities().instabuild) handStack.shrink(1);
+                    if (!pPlayer.getAbilities().instabuild)
+                        handStack.shrink(1);
                     pLevel.playSound(null, pPos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.7f, 0.8f);
                 }
                 return InteractionResult.SUCCESS;
@@ -121,15 +125,36 @@ public class CuttingBoardBlock extends BaseEntityBlock {
         if (!pLevel.isClientSide && pState.getBlock() != pNewState.getBlock()) {
             BlockEntity be = pLevel.getBlockEntity(pPos);
             if (be instanceof Container) {
-                Containers.dropContents(pLevel, pPos, (Container)be);
+                Containers.dropContents(pLevel, pPos, (Container) be);
             }
         }
         super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
     }
 
-    @Nullable @Override public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) { return new CuttingBoardBlockEntity(pPos, pState); }
-    @Override public RenderShape getRenderShape(BlockState pState) { return RenderShape.MODEL; }
-    @Override public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) { Direction facing = pState.getValue(FACING); return (facing == Direction.EAST || facing == Direction.WEST) ? SHAPE_EAST_WEST : SHAPE_NORTH_SOUTH; }
-    @Override public BlockState getStateForPlacement(BlockPlaceContext pContext) { return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite()); }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) { pBuilder.add(FACING); }
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+        return new CuttingBoardBlockEntity(pPos, pState);
+    }
+
+    @Override
+    public RenderShape getRenderShape(BlockState pState) {
+        return RenderShape.MODEL;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Direction facing = pState.getValue(FACING);
+        return (facing == Direction.EAST || facing == Direction.WEST) ? SHAPE_EAST_WEST : SHAPE_NORTH_SOUTH;
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(FACING);
+    }
 }

@@ -47,7 +47,9 @@ public class PotBlockItem extends BlockItem {
             ContainerHelper.loadAllItems(tag, items);
 
             boolean hasItem = false;
-            for(ItemStack s : items) if(!s.isEmpty()) hasItem = true;
+            for (ItemStack s : items)
+                if (!s.isEmpty())
+                    hasItem = true;
 
             if (hasItem) {
                 tooltip.add(Component.empty());
