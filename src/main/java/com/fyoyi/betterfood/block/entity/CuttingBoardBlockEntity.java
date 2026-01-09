@@ -38,6 +38,11 @@ import java.util.List;
 public class CuttingBoardBlockEntity extends BlockEntity implements Container {
     public static final int INVENTORY_SIZE = 4;
     private final NonNullList<ItemStack> items = NonNullList.withSize(INVENTORY_SIZE, ItemStack.EMPTY);
+    private final NonNullList<Long> itemRandomSeeds = NonNullList.withSize(INVENTORY_SIZE, 0L);
+
+    // 存储原料的随机位置偏移
+    private float rawIngredientOffsetX = 0f;
+    private float rawIngredientOffsetZ = 0f;
 
     private int cutProgress = 0;
     private static final int MAX_CUTS_REQUIRED = 3;
@@ -120,15 +125,28 @@ public class CuttingBoardBlockEntity extends BlockEntity implements Container {
         float enhancedFreshness = inputFreshness * 1.1f;
         long currentTime = TimeManager.getEffectiveTime(level);
 
+        // 获取可用的空槽位列表
+        java.util.List<Integer> availableSlots = new java.util.ArrayList<>();
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+            if (items.get(i).isEmpty()) {
+                availableSlots.add(i);
+            }
+        }
+
+        // 随机打乱槽位顺序
+        java.util.Collections.shuffle(availableSlots);
+
+        // 根据随机槽位放置物品
         int slotIndex = 0;
         for (ItemStack loot : generatedLoot) {
-            while (!loot.isEmpty() && slotIndex < INVENTORY_SIZE) {
-                if (items.get(slotIndex).isEmpty()) {
-                    ItemStack single = loot.split(1);
-                    // 设置产物新鲜度
-                    setCuttingProductFreshness(single, enhancedFreshness, currentTime);
-                    items.set(slotIndex, single);
-                }
+            while (!loot.isEmpty() && slotIndex < availableSlots.size()) {
+                int randomSlot = availableSlots.get(slotIndex);
+                ItemStack single = loot.split(1);
+                // 设置产物新鲜度
+                setCuttingProductFreshness(single, enhancedFreshness, currentTime);
+                items.set(randomSlot, single);
+                // 为此物品设置随机seed，使用纳秒时间确保每次都不同
+                itemRandomSeeds.set(randomSlot, System.nanoTime());
                 slotIndex++;
             }
             if (!loot.isEmpty()) {
@@ -224,6 +242,11 @@ public class CuttingBoardBlockEntity extends BlockEntity implements Container {
         super.saveAdditional(t);
         ContainerHelper.saveAllItems(t, items);
         t.putInt("CutProgress", cutProgress);
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+            t.putLong("RandomSeed_" + i, itemRandomSeeds.get(i));
+        }
+        t.putFloat("RawIngredientOffsetX", rawIngredientOffsetX);
+        t.putFloat("RawIngredientOffsetZ", rawIngredientOffsetZ);
     }
 
     @Override
@@ -232,6 +255,11 @@ public class CuttingBoardBlockEntity extends BlockEntity implements Container {
         items.clear();
         ContainerHelper.loadAllItems(t, items);
         cutProgress = t.getInt("CutProgress");
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+            itemRandomSeeds.set(i, t.getLong("RandomSeed_" + i));
+        }
+        rawIngredientOffsetX = t.getFloat("RawIngredientOffsetX");
+        rawIngredientOffsetZ = t.getFloat("RawIngredientOffsetZ");
     }
 
     public void markUpdated() {
@@ -275,6 +303,23 @@ public class CuttingBoardBlockEntity extends BlockEntity implements Container {
     public void setItem(int i, ItemStack s) {
         items.set(i, s);
         markUpdated();
+    }
+
+    public long getRandomSeed(int i) {
+        return itemRandomSeeds.get(i);
+    }
+
+    public void setRawIngredientPosition(float offsetX, float offsetZ) {
+        this.rawIngredientOffsetX = offsetX;
+        this.rawIngredientOffsetZ = offsetZ;
+    }
+
+    public float getRawIngredientOffsetX() {
+        return rawIngredientOffsetX;
+    }
+
+    public float getRawIngredientOffsetZ() {
+        return rawIngredientOffsetZ;
     }
 
     @Override
