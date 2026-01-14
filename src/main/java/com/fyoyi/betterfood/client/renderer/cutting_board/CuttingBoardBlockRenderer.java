@@ -69,7 +69,7 @@ public class CuttingBoardBlockRenderer implements BlockEntityRenderer<CuttingBoa
                 be.setRawIngredientPosition(offsetX, offsetZ);
 
                 poseStack.translate(offsetX, 0, offsetZ);
-                poseStack.mulPose(Axis.YP.rotationDegrees(rotY));
+                poseStack.mulPose(Axis.YP.rotationDegrees(rotY + 180f));
                 poseStack.mulPose(Axis.XP.rotationDegrees(90f));
 
                 // 应用压扁
@@ -95,7 +95,7 @@ public class CuttingBoardBlockRenderer implements BlockEntityRenderer<CuttingBoa
                 float stackY = renderIndex * STACK_HEIGHT_INCREMENT;
 
                 poseStack.translate(offsetX, stackY, offsetZ);
-                poseStack.mulPose(Axis.YP.rotationDegrees(rotY));
+                poseStack.mulPose(Axis.YP.rotationDegrees(rotY + 180f));
                 poseStack.mulPose(Axis.XP.rotationDegrees(90f));
                 poseStack.scale(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE);
             }

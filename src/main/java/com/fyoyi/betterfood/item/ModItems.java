@@ -57,6 +57,10 @@ public class ModItems {
                         () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder()
                                         .nutrition(7).saturationMod(0.75f).build())));
 
+        public static final RegistryObject<Item> DISH_BOWL = ITEMS.register("dish_bowl",
+                        () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder()
+                                        .nutrition(10).saturationMod(0.9f).build())));
+
         public static void register(IEventBus eventBus) {
                 ITEMS.register(eventBus);
         }
