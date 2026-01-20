@@ -117,6 +117,13 @@ public class CuttingBoardBlockEntity extends BlockEntity implements Container {
                     || (!rl.getNamespace().equals("minecraft") && !rl.getNamespace().equals(better_food.MOD_ID));
         });
 
+        // 记录菜谱（切菜）
+        String inputItemName = inputStack.getHoverName().getString();
+        if (!generatedLoot.isEmpty()) {
+            String outputItemName = generatedLoot.get(0).getHoverName().getString();
+            recordCuttingRecipe(player, inputItemName, outputItemName);
+        }
+
         this.items.set(0, ItemStack.EMPTY);
         this.cutProgress = 0;
 
@@ -320,6 +327,22 @@ public class CuttingBoardBlockEntity extends BlockEntity implements Container {
 
     public float getRawIngredientOffsetZ() {
         return rawIngredientOffsetZ;
+    }
+
+    /**
+     * 记录切菜菜谱到玩家菜谱书
+     */
+    private void recordCuttingRecipe(Player player, String inputItemName, String outputItemName) {
+        // 触发菜谱解锁事件
+        com.fyoyi.betterfood.event.RecipeUnlockEvent event = new com.fyoyi.betterfood.event.RecipeUnlockEvent(
+                player,
+                com.fyoyi.betterfood.event.RecipeUnlockEvent.RecipeType.CUTTING_BOARD,
+                inputItemName + " → " + outputItemName,
+                100.0f, // 切菜总是满分
+                new java.util.ArrayList<>() // 切菜没有特殊的食材要求
+        );
+
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
     }
 
     @Override

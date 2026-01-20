@@ -18,8 +18,8 @@ public class ModCreativeModeTabs {
     /*
      * 创造模式物品栏的延迟注册器
      */
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, better_food.MOD_ID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister
+            .create(Registries.CREATIVE_MODE_TAB, better_food.MOD_ID);
 
     /*
      * Better Food 创造模式物品栏的注册对象
@@ -39,11 +39,13 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.SPATULA.get());
                         output.accept(Items.BOWL);
                         output.accept(ModItems.OIL_BOWL.get());
+                        output.accept(ModItems.RECIPE_BOOK.get());
                     })
                     .build());
 
     /*
      * 注册创造模式物品栏
+     * 
      * @param eventBus IEventBus 事件总线
      */
     public static void register(IEventBus eventBus) {

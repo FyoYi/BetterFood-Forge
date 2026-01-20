@@ -27,14 +27,16 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterItemDecorationsEvent;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.gui.screens.inventory.BookViewScreen;
+import net.minecraft.world.item.WrittenBookItem;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -49,19 +51,18 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
 @Mod(better_food.MOD_ID)
-public class better_food
-{
+public class better_food {
     public static final String MOD_ID = "better_food";
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public better_food(FMLJavaModLoadingContext context)
-    {
+    public better_food(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
         // 1. 注册核心内容
@@ -77,7 +78,7 @@ public class better_food
         // 注册配置
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
-        // 注册网络包
+        // 注册网络消息
         NetworkManager.register();
 
         // 注册世界渲染器 (World Renderer)
@@ -93,7 +94,11 @@ public class better_food
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(this::addReloadListener);
 
-        // 注册 Tooltip 事件处理器
+        // 手动注册能力附加和菜谱解锁事件处理
+        MinecraftForge.EVENT_BUS
+                .register(new com.fyoyi.betterfood.event.PlayerRecipeBookCapability.CapabilityEventHandler());
+
+        // 注册 Tooltip 事件处理者
         MinecraftForge.EVENT_BUS.register(ClientForgeEvents.class);
     }
 
@@ -112,8 +117,42 @@ public class better_food
         LOGGER.info("HELLO from server starting");
     }
 
-    public static class ClientModEvents
-    {
+    @SubscribeEvent
+    public void onRightClickItem(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem event) {
+        ItemStack stack = event.getItemStack();
+        if (stack.getItem() == ModItems.RECIPE_BOOK.get()) {
+            net.minecraft.world.entity.player.Player player = (net.minecraft.world.entity.player.Player) event
+                    .getEntity();
+
+            // 仅在客户端打开GUI
+            if (player.level().isClientSide()) {
+                // 从玩家能力中获取菜谱书
+                var recipeBookCap = player
+                        .getCapability(com.fyoyi.betterfood.event.PlayerRecipeBookCapability.RECIPE_BOOK_CAP);
+
+                LOGGER.info("右键菜谱书 - 能力存在: {}", recipeBookCap.isPresent());
+
+                if (recipeBookCap.isPresent()) {
+                    com.fyoyi.betterfood.recipe.RecipeBook recipeBook = recipeBookCap.resolve().get().getRecipeBook();
+                    // 打开自定义菜谱书GUI
+                    net.minecraft.client.Minecraft.getInstance()
+                            .setScreen(new com.fyoyi.betterfood.client.gui.RecipeBookScreen(recipeBook));
+                    LOGGER.info("打开菜谱书GUI，当前菜谱数: {}", recipeBook.getTotalRecipeCount());
+                } else {
+                    LOGGER.warn("菜谱书能力不存在，尝试创建空白菜谱书");
+                    // 如果能力不存在，创建一个空白菜谱书
+                    com.fyoyi.betterfood.recipe.RecipeBook emptyBook = new com.fyoyi.betterfood.recipe.RecipeBook();
+                    net.minecraft.client.Minecraft.getInstance()
+                            .setScreen(new com.fyoyi.betterfood.client.gui.RecipeBookScreen(emptyBook));
+                }
+            }
+
+            // 取消默认行为
+            event.setCanceled(true);
+        }
+    }
+
+    public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             LOGGER.info("HELLO FROM CLIENT SETUP");
@@ -143,7 +182,8 @@ public class better_food
                 ItemStack defaultStack = new ItemStack(item);
                 if (FoodConfig.canRot(defaultStack)) {
                     event.register(item, (graphics, font, stack, x, y) -> {
-                        if (Minecraft.getInstance().level == null) return false;
+                        if (Minecraft.getInstance().level == null)
+                            return false;
                         float percent = FreshnessHelper.getFreshnessPercentage(Minecraft.getInstance().level, stack);
                         if (percent < 1.0F) {
                             int barWidth = Math.round(13.0F * percent);
@@ -157,161 +197,6 @@ public class better_food
                         }
                         return false;
                     });
-                }
-            }
-        }
-    }
-
-    // =================================================================
-    // 内部类 2: 客户端 Forge 总线事件 (Tooltip等)
-    // =================================================================
-    public static class ClientForgeEvents {
-
-        @SubscribeEvent
-        public static void onItemTooltip(net.minecraftforge.event.entity.player.ItemTooltipEvent event) {
-            ItemStack stack = event.getItemStack();
-
-            // 腐肉特殊处理
-            if (stack.getItem() == net.minecraft.world.item.Items.ROTTEN_FLESH) {
-                event.getToolTip().add(Component.literal("新鲜度: 已腐烂").withStyle(ChatFormatting.DARK_RED));
-                event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.DARK_RED));
-                event.getToolTip().add(Component.literal(" - 100%概率获得饥饿 (25秒)").withStyle(ChatFormatting.DARK_RED));
-                addFoodTagsInfo(event, stack);
-                return;
-            }
-
-            if (TimeManager.DECAY_ENABLED && FoodConfig.canRot(stack)) {
-                long lifetime = FoodConfig.getItemLifetime(stack);
-
-                if (lifetime == FoodConfig.SHELF_LIFE_INFINITE) {
-                    event.getToolTip().add(Component.literal("保质期: 永久保鲜").withStyle(ChatFormatting.GOLD));
-                    addFreshFoodEffects(event, stack);
-                    addFoodTagsInfo(event, stack);
-                    return;
-                }
-
-                net.minecraft.world.level.Level level = event.getEntity() != null ? event.getEntity().level() : null;
-                if (level == null) return;
-
-                String lifeStr = FreshnessHelper.formatDuration(lifetime);
-                event.getToolTip().add(Component.literal("保质期: " + lifeStr).withStyle(ChatFormatting.BLUE));
-
-                long expiry = FreshnessHelper.getExpiryTime(level, stack, false);
-                long remaining = (expiry == Long.MAX_VALUE) ? lifetime : Math.max(0, expiry - TimeManager.getEffectiveTime(level));
-
-                String remainStr = FreshnessHelper.formatDuration(remaining);
-                float percent = (float) remaining / lifetime;
-
-                ChatFormatting color = percent > 0.5f ? ChatFormatting.GREEN : (percent > 0.2f ? ChatFormatting.YELLOW : ChatFormatting.RED);
-                event.getToolTip().add(Component.literal("距离腐烂: " + remainStr).withStyle(color));
-
-                addFreshnessStatus(event, percent, stack);
-                addFoodTagsInfo(event, stack);
-            }
-        }
-
-        private static void addFreshnessStatus(net.minecraftforge.event.entity.player.ItemTooltipEvent event, float percent, ItemStack stack) {
-            String status;
-            ChatFormatting color;
-            if (percent >= 0.8f) { status = "新鲜"; color = ChatFormatting.GREEN; }
-            else if (percent >= 0.5f) { status = "不新鲜"; color = ChatFormatting.YELLOW; }
-            else if (percent >= 0.3f) { status = "略微变质"; color = ChatFormatting.GOLD; }
-            else if (percent >= 0.1f) { status = "变质"; color = ChatFormatting.RED; }
-            else { status = "严重变质"; color = ChatFormatting.DARK_RED; }
-
-            event.getToolTip().add(Component.literal("新鲜度: " + status).withStyle(color));
-            if (percent >= 0.8f) addFreshFoodEffects(event, stack);
-        }
-
-        private static void addFreshFoodEffects(net.minecraftforge.event.entity.player.ItemTooltipEvent event, ItemStack stack) {
-            List<FoodConfig.EffectBonus> bonuses = FoodConfig.getBonusEffects(stack);
-            if (bonuses != null && !bonuses.isEmpty()) {
-                boolean hasBonus = false;
-                event.getToolTip().add(Component.literal("食用效果:").withStyle(ChatFormatting.LIGHT_PURPLE));
-                for (FoodConfig.EffectBonus bonus : bonuses) {
-                    if (bonus.chance > 0) {
-                        hasBonus = true;
-                        String name = bonus.effect.getDescriptionId();
-                        event.getToolTip().add(Component.literal(" - " + (int)(bonus.chance*100) + "% " + name).withStyle(ChatFormatting.LIGHT_PURPLE));
-                    }
-                }
-                if (!hasBonus) event.getToolTip().add(Component.literal(" 无").withStyle(ChatFormatting.GRAY));
-            }
-        }
-
-        private static void addFoodTagsInfo(net.minecraftforge.event.entity.player.ItemTooltipEvent event, ItemStack stack) {
-            Set<String> tags = FoodConfig.getFoodTags(stack);
-            if (!tags.isEmpty()) {
-                String classification = null;
-                Set<String> features = new HashSet<>();
-                String nature = null;
-
-                // 使用 CookednessHelper 获取熟度信息 (自动处理 NBT/Config 优先级)
-                boolean hasDynamicCooked = CookednessHelper.hasDynamicCookedness(stack);
-
-                for (String tag : tags) {
-                    if (tag.startsWith("分类:")) {
-                        classification = tag.substring(3);
-                    } else if (tag.startsWith("特点:")) {
-                        features.add(tag.substring(3));
-                    } else if (tag.startsWith("熟度:")) {
-                        // 使用 Helper 统一获取显示的熟度字符串
-                        nature = CookednessHelper.getCookednessDisplayString(stack);
-                    }
-                }
-
-                // 如果 JSON 里没配熟度标签，但物品确实有 NBT 熟度，也强制显示
-                if (nature == null && hasDynamicCooked) {
-                    nature = CookednessHelper.getCookednessDisplayString(stack);
-                }
-
-                event.getToolTip().add(Component.literal("食物属性:").withStyle(ChatFormatting.AQUA));
-                if (classification != null) {
-                    event.getToolTip().add(Component.literal("分类: " + classification).withStyle(ChatFormatting.GRAY));
-                }
-                if (!features.isEmpty()) {
-                    StringBuilder featuresStr = new StringBuilder();
-                    for (String feature : features) {
-                        if (featuresStr.length() > 0) {
-                            featuresStr.append(", ");
-                        }
-                        featuresStr.append(feature);
-                    }
-                    event.getToolTip().add(Component.literal("特点: " + featuresStr.toString()).withStyle(ChatFormatting.GRAY));
-                }
-                if (nature != null) {
-                    // 使用 Helper 获取数值以确定颜色
-                    float cookedValue = CookednessHelper.getCurrentCookedness(stack);
-                    ChatFormatting natureColor = ChatFormatting.GRAY;
-                    if (hasDynamicCooked) {
-                        if (cookedValue >= 100f) natureColor = ChatFormatting.RED;   // 熟了/焦了
-                        else if (cookedValue > 0f) natureColor = ChatFormatting.GREEN; // 正在煮
-                    }
-
-                    event.getToolTip().add(Component.literal("熟度: " + nature).withStyle(natureColor));
-                }
-            }
-
-            // === 菜品评价显示 ===
-            if (stack.hasTag()) {
-                CompoundTag tag = stack.getTag();
-                if (tag.contains("DishScore")) {
-                    float score = tag.getFloat("DishScore");
-                    float avgFreshness = tag.getFloat("DishFreshness");
-                    float avgCookednessDeviation = tag.getFloat("DishCookednessDeviation");
-
-                    event.getToolTip().add(Component.empty());
-                    event.getToolTip().add(Component.literal("==== 菜品评价 ====").withStyle(ChatFormatting.GOLD));
-
-                    // 根据分数变色
-                    ChatFormatting scoreColor = ChatFormatting.RED;
-                    if (score >= 90) scoreColor = ChatFormatting.GOLD;
-                    else if (score >= 75) scoreColor = ChatFormatting.GREEN;
-                    else if (score >= 60) scoreColor = ChatFormatting.YELLOW;
-
-                    event.getToolTip().add(Component.literal(" 综合评分: " + String.format("%.1f", score)).withStyle(scoreColor));
-                    event.getToolTip().add(Component.literal(" 食材新鲜: " + String.format("%.1f", avgFreshness) + "%").withStyle(ChatFormatting.GRAY));
-                    event.getToolTip().add(Component.literal(" 火候控制: " + (avgCookednessDeviation < 5 ? "完美" : String.format("偏差 %.1f", avgCookednessDeviation))).withStyle(ChatFormatting.GRAY));
                 }
             }
         }
